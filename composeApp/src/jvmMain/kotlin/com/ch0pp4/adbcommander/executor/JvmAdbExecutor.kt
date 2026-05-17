@@ -1,5 +1,6 @@
 package com.ch0pp4.adbcommander.executor
 
+import com.ch0pp4.adbcommander.presentation.model.AdbResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -8,7 +9,7 @@ class JvmAdbExecutor(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : AdbExecutor {
 
-    override suspend fun execute(command: AdbCommand): AdbResult = execute(rawCommand = command.command)
+//    override suspend fun execute(command: AdbCommand): AdbResult = execute(rawCommand = command.command)
 
     override suspend fun execute(rawCommand: String): AdbResult = withContext(context = dispatcher) {
         if (rawCommand.isBlank()) {
