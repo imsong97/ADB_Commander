@@ -12,9 +12,7 @@ import com.ch0pp4.adbcommander.model.SavedCommand
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import java.time.LocalDateTime
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
@@ -46,15 +44,15 @@ class LocalDataSourceImpl(
                     IntentCommandType.START_SERVICE -> IntentType.STARTSERVICE
                     else -> IntentType.NONE
                 }
-                it[SavedCommandTable.createdAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                it[SavedCommandTable.createdAt] = LocalDateTime.now()
             }[SavedCommandTable.id].value
 
             extras.forEach { extra ->
                 SavedCommandExtraTable.insert {
-                    it[savedCommandId] = id
-                    it[extraType] = extra.type.name
+                    it[SavedCommandExtraTable.savedCommandId] = id
+                    it[SavedCommandExtraTable.extraType] = extra.type.name
                     it[SavedCommandExtraTable.extra] = extra.extra
-                    it[value] = extra.value
+                    it[SavedCommandExtraTable.value] = extra.value
                 }
             }
 
@@ -103,7 +101,7 @@ class LocalDataSourceImpl(
 
     override suspend fun deleteById(id: Int): Int = withContext(context = dispatcher) {
         transaction {
-            SavedCommandExtraTable.deleteWhere { savedCommandId eq id }
+            SavedCommandExtraTable.deleteWhere { SavedCommandExtraTable.savedCommandId eq id }
             SavedCommandTable.deleteWhere { SavedCommandTable.id eq id }
         }
     }

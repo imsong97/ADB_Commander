@@ -1,7 +1,7 @@
 package com.ch0pp4.adbcommander.database
 
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.kotlin.datetime.datetime
+import org.jetbrains.exposed.sql.javatime.datetime
 
 enum class SourceTab { BROADCAST, COMMAND }
 
