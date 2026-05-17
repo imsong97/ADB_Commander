@@ -1,4 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ADB Commander</string>
+
+    <!-- Sidebar -->
+    <string name="tab_send_broadcast">Send Broadcast</string>
+    <string name="tab_command">명령어</string>
+    <string name="save_current_command">save current command</string>
+
+    <!-- Raw Command Screen -->
+    <string name="adb_command_label">ADB 명령어</string>
+    <string name="adb_command_hint">adb 명령어를 입력하세요 (예: adb devices)</string>
+    <string name="btn_run">실행</string>
+    <string name="execution_result">실행 결과</string>
+
+    <!-- Send Broadcast Screen -->
+    <string name="action_label">Action (-a)</string>
+    <string name="broadcast_chip">broadcast</string>
+    <string name="action_hint">com.example.ACTION_NAME</string>
+    <string name="btn_reset">초기화</string>
+    <string name="extras_label">Extras</string>
+    <string name="col_type">Type</string>
+    <string name="col_extra">Extra</string>
+    <string name="col_value">Value</string>
+    <string name="extras_empty_hint">+ 버튼을 눌러 Extra를 추가하세요</string>
+    <string name="completed_command">완성된 명령어</string>
+
+    <!-- Save Dialog -->
+    <string name="dialog_save_title">커맨드 저장</string>
+    <string name="dialog_name_label">이름</string>
+    <string name="btn_save">저장</string>
+    <string name="btn_cancel">취소</string>
 </resources>
