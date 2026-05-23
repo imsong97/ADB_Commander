@@ -2,9 +2,8 @@ package com.ch0pp4.adbcommander.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ch0pp4.adbcommander.CommandRepository
+import com.ch0pp4.adbcommander.data.CommandRepository
 import com.ch0pp4.adbcommander.executor.AdbExecutor
-import com.ch0pp4.adbcommander.model.IntentCommandType as SharedIntentCommandType
 import com.ch0pp4.adbcommander.presentation.model.BroadcastExtraUiModel
 import com.ch0pp4.adbcommander.presentation.model.IntentCommandType
 import com.ch0pp4.adbcommander.presentation.model.SavedCommandUiModel
@@ -102,7 +101,7 @@ class SendBroadcastViewModel(
                 commandRepository.saveBroadcastCommand(
                     title = title,
                     command = state.completedCommand,
-                    intentType = SharedIntentCommandType.valueOf(state.commandType.name),
+                    intentType = state.commandType.toData(),
                     extras = state.extras.map { it.toData() },
                 )
                 loadSavedItems()

@@ -1,7 +1,7 @@
 package com.ch0pp4.adbcommander.presentation
 
 import androidx.lifecycle.ViewModel
-import com.ch0pp4.adbcommander.CommandRepository
+import com.ch0pp4.adbcommander.data.CommandRepository
 import com.ch0pp4.adbcommander.executor.AdbExecutor
 import com.ch0pp4.adbcommander.presentation.model.AdbUiState
 import com.ch0pp4.adbcommander.presentation.model.SavedCommandUiModel

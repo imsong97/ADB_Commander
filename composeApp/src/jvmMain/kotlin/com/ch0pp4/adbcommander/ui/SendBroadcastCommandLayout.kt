@@ -16,11 +16,11 @@ import androidx.compose.ui.unit.dp
 import adbcommander.composeapp.generated.resources.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
-import com.ch0pp4.adbcommander.model.ExtraType
 import com.ch0pp4.adbcommander.ui.components.DeleteIconButton
 import com.ch0pp4.adbcommander.ui.components.ResultBox
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.BroadcastExtraUiModel
+import com.ch0pp4.adbcommander.presentation.model.ExtraTypeList
 import com.ch0pp4.adbcommander.presentation.model.IntentCommandType
 import org.jetbrains.compose.resources.stringResource
 
@@ -238,7 +238,7 @@ private fun ExtraRow(
                 expanded = typeExpanded,
                 onDismissRequest = { typeExpanded = false },
             ) {
-                ExtraType.entries.forEach { type ->
+                ExtraTypeList.entries.forEach { type ->
                     DropdownMenuItem(
                         text = { Text(type.displayName) },
                         onClick = {

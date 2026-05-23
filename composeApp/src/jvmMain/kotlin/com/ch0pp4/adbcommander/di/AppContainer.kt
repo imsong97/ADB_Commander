@@ -5,10 +5,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.ch0pp4.adbcommander.CommandRepository
-import com.ch0pp4.adbcommander.CommandRepositoryImpl
-import com.ch0pp4.adbcommander.LocalDataSourceImpl
-import com.ch0pp4.adbcommander.datastore.LocalDataSource
+import com.ch0pp4.adbcommander.data.CommandRepository
+import com.ch0pp4.adbcommander.data.CommandRepositoryImpl
+import com.ch0pp4.adbcommander.local.LocalDataSourceImpl
+import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
 import com.ch0pp4.adbcommander.executor.AdbExecutor
 import com.ch0pp4.adbcommander.executor.JvmAdbExecutor
 import com.ch0pp4.adbcommander.presentation.AdbViewModel

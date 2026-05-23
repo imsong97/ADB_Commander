@@ -1,5 +1,7 @@
 package com.ch0pp4.adbcommander.presentation.model
 
+import com.ch0pp4.adbcommander.data.model.IntentCommandType as DataIntentCommandType
+
 enum class IntentCommandType(
     val label: String,
     val adbCommand: String,
@@ -10,3 +12,6 @@ enum class IntentCommandType(
     START("start", "am start", "-n", "com.example/.MainActivity"),
     START_SERVICE("start service", "am startservice", "-n", "com.example/.MyService"),
 }
+
+fun IntentCommandType.toData(): DataIntentCommandType = DataIntentCommandType.valueOf(this.name)
+fun DataIntentCommandType.toPresentation(): IntentCommandType = IntentCommandType.valueOf(this.name)

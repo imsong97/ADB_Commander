@@ -13,7 +13,7 @@ import androidx.compose.ui.window.rememberWindowState
 import androidx.lifecycle.ViewModelStore
 import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.app_name
-import com.ch0pp4.adbcommander.database.DatabaseFactory
+import com.ch0pp4.adbcommander.local.database.DatabaseFactory
 import com.ch0pp4.adbcommander.di.AppContainer
 import com.ch0pp4.adbcommander.presentation.AdbViewModel
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel

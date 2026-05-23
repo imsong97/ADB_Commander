@@ -1,4 +1,4 @@
-package com.ch0pp4.adbcommander.model
+package com.ch0pp4.adbcommander.data.model
 
 data class SavedCommand(
     val id: Int,

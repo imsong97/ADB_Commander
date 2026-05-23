@@ -1,6 +1,6 @@
 package com.ch0pp4.adbcommander.presentation.model
 
-import com.ch0pp4.adbcommander.model.SavedCommand
+import com.ch0pp4.adbcommander.data.model.SavedCommand
 
 data class SavedCommandUiModel(
     val id: Int,
@@ -16,6 +16,6 @@ fun SavedCommand.toPresentation() = SavedCommandUiModel(
     title = title,
     command = command,
     isDefault = isDefault,
-    intentType = IntentCommandType.valueOf(intentType.name),
+    intentType = intentType.toPresentation(),
     extras = extras.map { it.toPresentation() },
 )
