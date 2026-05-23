@@ -1,4 +1,4 @@
-package com.ch0pp4.adbcommander.database
+package com.ch0pp4.adbcommander.local.database
 
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils

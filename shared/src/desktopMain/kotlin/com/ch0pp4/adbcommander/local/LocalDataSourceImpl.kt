@@ -1,14 +1,14 @@
-package com.ch0pp4.adbcommander
+package com.ch0pp4.adbcommander.local
 
-import com.ch0pp4.adbcommander.database.IntentType
-import com.ch0pp4.adbcommander.database.SavedCommandExtraTable
-import com.ch0pp4.adbcommander.database.SavedCommandTable
-import com.ch0pp4.adbcommander.database.SourceTab
-import com.ch0pp4.adbcommander.datastore.LocalDataSource
-import com.ch0pp4.adbcommander.model.BroadcastExtra
-import com.ch0pp4.adbcommander.model.ExtraType
-import com.ch0pp4.adbcommander.model.IntentCommandType
-import com.ch0pp4.adbcommander.model.SavedCommand
+import com.ch0pp4.adbcommander.local.database.IntentType
+import com.ch0pp4.adbcommander.local.database.SavedCommandExtraTable
+import com.ch0pp4.adbcommander.local.database.SavedCommandTable
+import com.ch0pp4.adbcommander.local.database.SourceTab
+import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
+import com.ch0pp4.adbcommander.data.model.BroadcastExtra
+import com.ch0pp4.adbcommander.data.model.ExtraType
+import com.ch0pp4.adbcommander.data.model.IntentCommandType
+import com.ch0pp4.adbcommander.data.model.SavedCommand
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

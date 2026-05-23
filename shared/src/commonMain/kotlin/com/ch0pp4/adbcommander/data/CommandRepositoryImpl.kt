@@ -1,9 +1,9 @@
-package com.ch0pp4.adbcommander
+package com.ch0pp4.adbcommander.data
 
-import com.ch0pp4.adbcommander.datastore.LocalDataSource
-import com.ch0pp4.adbcommander.model.BroadcastExtra
-import com.ch0pp4.adbcommander.model.IntentCommandType
-import com.ch0pp4.adbcommander.model.SavedCommand
+import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
+import com.ch0pp4.adbcommander.data.model.BroadcastExtra
+import com.ch0pp4.adbcommander.data.model.IntentCommandType
+import com.ch0pp4.adbcommander.data.model.SavedCommand
 
 class CommandRepositoryImpl(
     private val localDataSource: LocalDataSource,

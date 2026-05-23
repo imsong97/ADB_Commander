@@ -1,4 +1,4 @@
-package com.ch0pp4.adbcommander.database
+package com.ch0pp4.adbcommander.local.database
 
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.datetime

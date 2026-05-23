@@ -1,8 +1,8 @@
-package com.ch0pp4.adbcommander
+package com.ch0pp4.adbcommander.data
 
-import com.ch0pp4.adbcommander.model.BroadcastExtra
-import com.ch0pp4.adbcommander.model.IntentCommandType
-import com.ch0pp4.adbcommander.model.SavedCommand
+import com.ch0pp4.adbcommander.data.model.BroadcastExtra
+import com.ch0pp4.adbcommander.data.model.IntentCommandType
+import com.ch0pp4.adbcommander.data.model.SavedCommand
 
 interface CommandRepository {
     suspend fun saveBroadcastCommand(
