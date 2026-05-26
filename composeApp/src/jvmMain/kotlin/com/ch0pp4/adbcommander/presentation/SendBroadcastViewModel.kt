@@ -29,8 +29,6 @@ class SendBroadcastViewModel(
     private val _uiState = MutableStateFlow(SendBroadcastUiState())
     val uiState: StateFlow<SendBroadcastUiState> = _uiState.asStateFlow()
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, e -> e.printStackTrace() }
-
     init {
         loadSavedItems()
     }

@@ -91,7 +91,7 @@ fun SendBroadcastCommandLayout(
                 Text(stringResource(Res.string.btn_run))
             }
 
-            OutlinedButton(onClick = viewModel::onReset) {
+            OutlinedButton(onClick = viewModel::onReset, enabled = state.primaryValue.isNotBlank()) {
                 Text(stringResource(Res.string.btn_reset))
             }
         }

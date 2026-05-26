@@ -1,6 +1,7 @@
 package com.ch0pp4.adbcommander.presentation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ch0pp4.adbcommander.data.CommandRepository
 import com.ch0pp4.adbcommander.executor.AdbExecutor
 import com.ch0pp4.adbcommander.presentation.model.AdbUiState
@@ -26,9 +27,6 @@ class AdbViewModel(
     private val _uiState = MutableStateFlow(AdbUiState())
     val uiState: StateFlow<AdbUiState> = _uiState.asStateFlow()
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, e -> e.printStackTrace() }
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob() + exceptionHandler)
-
     init {
         loadSavedItems()
     }
@@ -40,7 +38,7 @@ class AdbViewModel(
     fun onRun() {
         val command = _uiState.value.command
         if (command.isBlank()) return
-        scope.launch {
+        viewModelScope.launch {
             val result = executor.execute(command).toDisplayString()
             _uiState.update { it.copy(executionResult = result) }
         }
@@ -49,7 +47,7 @@ class AdbViewModel(
     fun saveCommand(title: String) {
         val command = _uiState.value.command
         if (title.isBlank() || command.isBlank()) return
-        scope.launch {
+        viewModelScope.launch {
             try {
                 commandRepository.saveADBCommand(title = title, command = command)
                 loadSavedItems()
@@ -61,7 +59,7 @@ class AdbViewModel(
     }
 
     fun deleteItem(item: SavedCommandUiModel) {
-        scope.launch {
+        viewModelScope.launch {
             commandRepository.deleteById(item.id)
             loadSavedItems()
         }
@@ -72,7 +70,7 @@ class AdbViewModel(
     }
 
     private fun loadSavedItems() {
-        scope.launch {
+        viewModelScope.launch {
             val items = commandRepository.getByTab("COMMAND").map { it.toPresentation() }
             _uiState.update { it.copy(savedItems = items) }
         }
@@ -80,6 +78,6 @@ class AdbViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        scope.cancel()
+        viewModelScope.cancel()
     }
 }
