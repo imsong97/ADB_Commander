@@ -71,7 +71,10 @@ fun LeftTabLayout(
                         broadcastState.savedItems.forEach { item ->
                             SavedItemRow(
                                 item = item,
-                                onSelected = { broadcastViewModel.selectItem(item) },
+                                onSelected = {
+                                    broadcastViewModel.selectItem(item)
+                                    onTabSelected(MainTab.SEND_BROADCAST)
+                                },
                                 onDeleted = { broadcastViewModel.deleteItem(item) },
                             )
                         }
@@ -106,7 +109,10 @@ fun LeftTabLayout(
                         adbState.savedItems.forEach { item ->
                             SavedItemRow(
                                 item = item,
-                                onSelected = { adbViewModel.selectItem(item) },
+                                onSelected = {
+                                    adbViewModel.selectItem(item)
+                                    onTabSelected(MainTab.COMMAND_LIST)
+                                },
                                 onDeleted = { adbViewModel.deleteItem(item) },
                             )
                         }
