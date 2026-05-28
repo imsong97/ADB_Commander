@@ -8,7 +8,7 @@ import java.io.File
 object DatabaseFactory {
 
     fun init() {
-        val dbDir = File(System.getProperty("user.dir"), ".adbcommander")
+        val dbDir = File(findProjectRoot(), ".adbcommander")
         dbDir.mkdirs()
         val dbFile = File(dbDir, "adbcommander.db")
 
@@ -24,5 +24,14 @@ object DatabaseFactory {
             )
         }
 
+    }
+
+    private fun findProjectRoot(): File {
+        var dir = File(System.getProperty("user.dir"))
+        while (dir.parentFile != null) {
+            if (File(dir, "settings.gradle.kts").exists()) return dir
+            dir = dir.parentFile
+        }
+        return File(System.getProperty("user.dir"))
     }
 }
