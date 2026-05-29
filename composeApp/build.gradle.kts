@@ -39,7 +39,7 @@ compose.desktop {
         mainClass = "com.ch0pp4.adbcommander.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Pkg, TargetFormat.Msi, TargetFormat.Exe)
             packageName = "com.ch0pp4.adbcommander"
             packageVersion = "1.0.0"
         }
