@@ -38,10 +38,15 @@ class AdbViewModel(
     fun onRun() {
         val command = _uiState.value.command
         if (command.isBlank()) return
+        _uiState.update { it.copy(executionResult = "") }
         viewModelScope.launch {
             val result = executor.execute(command).toDisplayString()
             _uiState.update { it.copy(executionResult = result) }
         }
+    }
+
+    fun onReset() {
+        _uiState.update { it.copy(command = "", executionResult = "") }
     }
 
     fun saveCommand(title: String) {

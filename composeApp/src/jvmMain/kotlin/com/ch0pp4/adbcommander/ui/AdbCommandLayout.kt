@@ -46,6 +46,12 @@ fun AdbCommandLayout(
             ) {
                 Text(stringResource(Res.string.btn_run))
             }
+            OutlinedButton(
+                onClick = viewModel::onReset,
+                enabled = state.command.isNotBlank() || state.executionResult.isNotBlank(),
+            ) {
+                Text(stringResource(Res.string.btn_reset))
+            }
         }
 
         HorizontalDivider()

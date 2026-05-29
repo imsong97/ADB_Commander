@@ -73,6 +73,7 @@ class SendBroadcastViewModel(
     fun onRun() {
         val command = _uiState.value.completedCommand
         if (command.isBlank()) return
+        _uiState.update { it.copy(executionResult = "") }
         viewModelScope.launch {
             val result = executor.execute(command).toDisplayString()
             _uiState.update { it.copy(executionResult = result) }
