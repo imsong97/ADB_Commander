@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import adbcommander.composeapp.generated.resources.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 import com.ch0pp4.adbcommander.ui.components.DeleteIconButton
 import com.ch0pp4.adbcommander.ui.components.ResultBox
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
@@ -137,7 +139,10 @@ fun SendBroadcastCommandLayout(
                 selectable = true,
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
             )
-            IconButton(onClick = viewModel::onCopy) {
+            IconButton(onClick = {
+                Toolkit.getDefaultToolkit().systemClipboard
+                    .setContents(StringSelection(state.completedCommand), null)
+            }) {
                 Icon(Icons.Outlined.ContentCopy, contentDescription = stringResource(Res.string.copy_command_description))
             }
         }

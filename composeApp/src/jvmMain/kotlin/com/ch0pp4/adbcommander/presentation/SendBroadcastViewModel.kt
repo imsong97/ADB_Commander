@@ -18,8 +18,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.awt.Toolkit
-import java.awt.datatransfer.StringSelection
 
 class SendBroadcastViewModel(
     private val commandRepository: CommandRepository,
@@ -85,11 +83,6 @@ class SendBroadcastViewModel(
             val new = state.copy(primaryValue = "", extras = emptyList(), executionResult = "")
             new.copy(completedCommand = buildCommand(new))
         }
-    }
-
-    fun onCopy() {
-        Toolkit.getDefaultToolkit().systemClipboard
-            .setContents(StringSelection(_uiState.value.completedCommand), null)
     }
 
     fun saveCommand(title: String) {
