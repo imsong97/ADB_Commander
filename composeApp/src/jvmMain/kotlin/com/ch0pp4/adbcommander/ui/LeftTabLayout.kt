@@ -20,6 +20,7 @@ import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.MainTab
 import com.ch0pp4.adbcommander.presentation.model.SavedCommandUiModel
 import com.ch0pp4.adbcommander.ui.components.DeleteIconButton
+import com.ch0pp4.adbcommander.ui.theme.LightOnSurfaceVariant
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -206,6 +207,8 @@ private fun SavedItemRow(
     onSelected: () -> Unit,
     onDeleted: () -> Unit,
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -219,6 +222,35 @@ private fun SavedItemRow(
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
         )
-        DeleteIconButton(onClick = onDeleted)
+        DeleteIconButton(onClick = { showDeleteDialog = true })
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = {},
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            title = { Text(stringResource(Res.string.dialog_delete_title)) },
+            text = { Text("\"${item.title}\"\n${stringResource(Res.string.dialog_delete_message)}") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDeleted()
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(Res.string.btn_delete)) }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = LightOnSurfaceVariant),
+                ) {
+                    Text(stringResource(Res.string.btn_cancel)
+                    )
+                }
+            },
+        )
     }
 }

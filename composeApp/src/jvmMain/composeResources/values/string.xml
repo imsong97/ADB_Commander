@@ -4,31 +4,36 @@
 
     <!-- Sidebar -->
     <string name="tab_send_broadcast">Send Broadcast</string>
-    <string name="tab_command">명령어</string>
-    <string name="save_current_command">save current command</string>
+    <string name="tab_command">Command</string>
+    <string name="save_current_command">Save current command</string>
 
     <!-- Raw Command Screen -->
-    <string name="adb_command_label">ADB 명령어</string>
-    <string name="adb_command_hint">adb 명령어를 입력하세요 (예: adb devices)</string>
-    <string name="btn_run">실행</string>
-    <string name="execution_result">실행 결과</string>
+    <string name="adb_command_label">ADB Command</string>
+    <string name="adb_command_hint">Enter an ADB command (e.g. adb devices)</string>
+    <string name="btn_run">Run</string>
+    <string name="execution_result">Execution Result</string>
 
     <!-- Send Broadcast Screen -->
     <string name="action_label">Action (-a)</string>
     <string name="broadcast_chip">broadcast</string>
     <string name="action_hint">com.example.ACTION_NAME</string>
-    <string name="btn_reset">초기화</string>
+    <string name="btn_reset">Reset</string>
     <string name="extras_label">Extras</string>
     <string name="col_type">Type</string>
     <string name="col_extra">Extra</string>
     <string name="col_value">Value</string>
-    <string name="extras_empty_hint">+ 버튼을 눌러 Extra를 추가하세요</string>
-    <string name="completed_command">완성된 명령어</string>
+    <string name="extras_empty_hint">Press + to add an Extra</string>
+    <string name="completed_command">Completed Command</string>
     <string name="copy_command_description">copy command</string>
 
     <!-- Save Dialog -->
-    <string name="dialog_save_title">커맨드 저장</string>
-    <string name="dialog_name_label">이름</string>
-    <string name="btn_save">저장</string>
-    <string name="btn_cancel">취소</string>
+    <string name="dialog_save_title">Save Command</string>
+    <string name="dialog_name_label">Name</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_delete">Delete</string>
+
+    <!-- Delete Dialog -->
+    <string name="dialog_delete_title">Delete Command</string>
+    <string name="dialog_delete_message">Are you sure you want to delete this command?</string>
 </resources>
