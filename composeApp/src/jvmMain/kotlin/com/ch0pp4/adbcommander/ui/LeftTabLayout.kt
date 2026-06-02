@@ -12,9 +12,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import adbcommander.composeapp.generated.resources.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Edit
 import com.ch0pp4.adbcommander.presentation.AdbViewModel
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.MainTab
@@ -77,6 +80,7 @@ fun LeftTabLayout(
                                     onTabSelected(MainTab.SEND_BROADCAST)
                                 },
                                 onDeleted = { broadcastViewModel.deleteItem(item) },
+                                onRenamed = { broadcastViewModel.renameItem(item, it) },
                             )
                         }
                     }
@@ -115,6 +119,7 @@ fun LeftTabLayout(
                                     onTabSelected(MainTab.COMMAND_LIST)
                                 },
                                 onDeleted = { adbViewModel.deleteItem(item) },
+                                onRenamed = { adbViewModel.renameItem(item, it) },
                             )
                         }
                     }
@@ -206,23 +211,73 @@ private fun SavedItemRow(
     item: SavedCommandUiModel,
     onSelected: () -> Unit,
     onDeleted: () -> Unit,
+    onRenamed: (String) -> Unit,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showRenameDialog by remember { mutableStateOf(false) }
+    var renameText by remember { mutableStateOf("") }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onSelected)
-            .padding(start = 36.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
+            .padding(start = 24.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = item.title,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).padding(top = 8.dp, bottom = 8.dp),
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
+        IconButton(
+            onClick = {
+                renameText = item.title
+                showRenameDialog = true
+            },
+            modifier = Modifier.size(28.dp),
+        ) {
+            Icon(
+                Icons.Outlined.Edit,
+                contentDescription = stringResource(Res.string.edit_command_title),
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         DeleteIconButton(onClick = { showDeleteDialog = true })
+    }
+
+    if (showRenameDialog) {
+        AlertDialog(
+            onDismissRequest = {},
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            title = { Text(stringResource(Res.string.dialog_rename_title)) },
+            text = {
+                OutlinedTextField(
+                    value = renameText,
+                    onValueChange = { renameText = it },
+                    label = { Text(stringResource(Res.string.dialog_name_label)) },
+                    singleLine = true,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = renameText.isNotBlank(),
+                    onClick = {
+                        onRenamed(renameText)
+                        showRenameDialog = false
+                    },
+                ) { Text(stringResource(Res.string.btn_save)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRenameDialog = false }) {
+                    Text(stringResource(Res.string.btn_cancel))
+                }
+            },
+        )
     }
 
     if (showDeleteDialog) {
@@ -240,15 +295,16 @@ private fun SavedItemRow(
                         showDeleteDialog = false
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                ) { Text(stringResource(Res.string.btn_delete)) }
+                ) {
+                    Text(stringResource(Res.string.btn_delete))
+                }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showDeleteDialog = false },
                     colors = ButtonDefaults.textButtonColors(contentColor = LightOnSurfaceVariant),
                 ) {
-                    Text(stringResource(Res.string.btn_cancel)
-                    )
+                    Text(stringResource(Res.string.btn_cancel))
                 }
             },
         )

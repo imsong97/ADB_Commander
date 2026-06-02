@@ -14,4 +14,5 @@ interface CommandRepository {
     suspend fun saveADBCommand(title: String, command: String, extras: List<BroadcastExtra> = emptyList()): Int
     suspend fun getByTab(sourceTab: String): List<SavedCommand>
     suspend fun deleteById(id: Int): Int
+    suspend fun renameCommand(id: Int, title: String): Int
 }

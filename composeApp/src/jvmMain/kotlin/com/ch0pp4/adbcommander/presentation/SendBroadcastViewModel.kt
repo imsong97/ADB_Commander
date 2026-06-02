@@ -111,6 +111,14 @@ class SendBroadcastViewModel(
         }
     }
 
+    fun renameItem(item: SavedCommandUiModel, newTitle: String) {
+        if (newTitle.isBlank()) return
+        viewModelScope.launch {
+            commandRepository.renameCommand(item.id, newTitle)
+            loadSavedItems()
+        }
+    }
+
     fun selectItem(item: SavedCommandUiModel) {
         val prefix = "adb shell ${item.intentType.adbCommand} ${item.intentType.actionFlag} "
         val primaryValue = item.command.removePrefix(prefix).substringBefore(" --").trim()

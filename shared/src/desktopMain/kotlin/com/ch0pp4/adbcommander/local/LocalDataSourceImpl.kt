@@ -19,6 +19,7 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 
 class LocalDataSourceImpl(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
@@ -103,6 +104,14 @@ class LocalDataSourceImpl(
         transaction {
             SavedCommandExtraTable.deleteWhere { SavedCommandExtraTable.savedCommandId eq id }
             SavedCommandTable.deleteWhere { SavedCommandTable.id eq id }
+        }
+    }
+
+    override suspend fun updateTitle(id: Int, title: String): Int = withContext(context = dispatcher) {
+        transaction {
+            SavedCommandTable.update({ SavedCommandTable.id eq id }) {
+                it[SavedCommandTable.title] = title
+            }
         }
     }
 }

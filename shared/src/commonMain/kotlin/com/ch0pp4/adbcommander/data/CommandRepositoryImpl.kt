@@ -36,4 +36,7 @@ class CommandRepositoryImpl(
 
     override suspend fun deleteById(id: Int): Int =
         localDataSource.deleteById(id)
+
+    override suspend fun renameCommand(id: Int, title: String): Int =
+        localDataSource.updateTitle(id, title)
 }

@@ -70,6 +70,14 @@ class AdbViewModel(
         }
     }
 
+    fun renameItem(item: SavedCommandUiModel, newTitle: String) {
+        if (newTitle.isBlank()) return
+        viewModelScope.launch {
+            commandRepository.renameCommand(item.id, newTitle)
+            loadSavedItems()
+        }
+    }
+
     fun selectItem(item: SavedCommandUiModel) {
         _uiState.update { it.copy(command = item.command, executionResult = "") }
     }

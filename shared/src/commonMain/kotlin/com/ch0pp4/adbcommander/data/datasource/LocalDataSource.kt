@@ -13,4 +13,5 @@ interface LocalDataSource {
     ): Int
     suspend fun getByTab(sourceTab: String): List<SavedCommand>
     suspend fun deleteById(id: Int): Int
+    suspend fun updateTitle(id: Int, title: String): Int
 }

@@ -6,6 +6,7 @@
     <string name="tab_send_broadcast">Send Broadcast</string>
     <string name="tab_command">Command</string>
     <string name="save_current_command">Save current command</string>
+    <string name="edit_command_title">Edit Command title</string>
 
     <!-- Raw Command Screen -->
     <string name="adb_command_label">ADB Command</string>
@@ -25,6 +26,7 @@
     <string name="extras_empty_hint">Press + to add an Extra</string>
     <string name="completed_command">Completed Command</string>
     <string name="copy_command_description">copy command</string>
+    <string name="add_extra">Add Extra</string>
 
     <!-- Save Dialog -->
     <string name="dialog_save_title">Save Command</string>
@@ -36,4 +38,7 @@
     <!-- Delete Dialog -->
     <string name="dialog_delete_title">Delete Command</string>
     <string name="dialog_delete_message">Are you sure you want to delete this command?</string>
+
+    <!-- Rename Dialog -->
+    <string name="dialog_rename_title">Rename Command</string>
 </resources>

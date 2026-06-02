@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import adbcommander.composeapp.generated.resources.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ContentCopy
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
@@ -110,7 +111,7 @@ fun SendBroadcastCommandLayout(
                 style = MaterialTheme.typography.titleSmall,
             )
             IconButton(onClick = viewModel::onExtraAdd) {
-                Text("➕", style = MaterialTheme.typography.labelLarge)
+                Icon(imageVector = Icons.Outlined.Add, contentDescription = stringResource(Res.string.add_extra))
             }
         }
 

@@ -13,12 +13,13 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun DeleteIconButton(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier.size(32.dp),
+    modifier: Modifier = Modifier.size(28.dp),
 ) {
     IconButton(onClick = onClick, modifier = modifier) {
         Icon(
             imageVector = Icons.Outlined.Delete,
             contentDescription = "Delete Item",
+            modifier = Modifier.size(16.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
