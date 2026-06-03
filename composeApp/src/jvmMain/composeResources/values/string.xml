@@ -41,4 +41,7 @@
 
     <!-- Rename Dialog -->
     <string name="dialog_rename_title">Rename Command</string>
+
+    <!-- Menu bar -->
+    <string name="menu_view">View</string>
 </resources>

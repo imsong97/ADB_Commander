@@ -15,10 +15,12 @@ import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.app_name
 import com.ch0pp4.adbcommander.local.database.DatabaseFactory
 import com.ch0pp4.adbcommander.di.AppContainer
+import com.ch0pp4.adbcommander.preference.AppPreferences
 import com.ch0pp4.adbcommander.presentation.AdbViewModel
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.MainTab
 import com.ch0pp4.adbcommander.ui.AdbCommandLayout
+import com.ch0pp4.adbcommander.ui.AppMenuBar
 import com.ch0pp4.adbcommander.ui.LeftTabLayout
 import com.ch0pp4.adbcommander.ui.SendBroadcastCommandLayout
 import com.ch0pp4.adbcommander.ui.theme.AdbCommanderTheme
@@ -29,6 +31,7 @@ fun main() = application {
     val windowState = rememberWindowState(size = DpSize(width = 1200.dp, height = 700.dp))
     val viewModelStore = remember { ViewModelStore() }
     val appContainer = remember { AppContainer() }
+    val appPreferences = remember { AppPreferences() }
 
     Window(
         onCloseRequest = {
@@ -45,6 +48,19 @@ fun main() = application {
             appContainer.getSendBroadcastViewModel(viewModelStore)
         }
         var selectedTab by remember { mutableStateOf(MainTab.SEND_BROADCAST) }
+        var visibleTabs by remember { mutableStateOf(appPreferences.getVisibleTabs()) }
+
+        AppMenuBar(
+            visibleTabs = visibleTabs,
+            onTabVisibilityChange = { tab, checked ->
+                val newVisible = if (checked) visibleTabs + tab else visibleTabs - tab
+                visibleTabs = newVisible
+                appPreferences.setTabVisible(tab, checked)
+                if (!checked && selectedTab == tab) {
+                    newVisible.firstOrNull()?.let { selectedTab = it }
+                }
+            },
+        )
 
         AdbCommanderTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
@@ -52,6 +68,7 @@ fun main() = application {
                     LeftTabLayout(
                         modifier = Modifier.width(220.dp).fillMaxHeight(),
                         selectedTab = selectedTab,
+                        visibleTabs = visibleTabs,
                         onTabSelected = { selectedTab = it },
                         adbViewModel = adbViewModel,
                         broadcastViewModel = broadcastViewModel,
@@ -59,15 +76,19 @@ fun main() = application {
 
                     VerticalDivider()
 
-                    when (selectedTab) {
-                        MainTab.SEND_BROADCAST -> SendBroadcastCommandLayout(
-                            modifier = Modifier.fillMaxSize(),
-                            viewModel = broadcastViewModel,
-                        )
-                        MainTab.COMMAND_LIST -> AdbCommandLayout(
-                            modifier = Modifier.fillMaxSize(),
-                            viewModel = adbViewModel,
-                        )
+                    if (visibleTabs.isEmpty()) {
+                        Box(modifier = Modifier.fillMaxSize())
+                    } else {
+                        when (selectedTab) {
+                            MainTab.SEND_BROADCAST -> SendBroadcastCommandLayout(
+                                modifier = Modifier.fillMaxSize(),
+                                viewModel = broadcastViewModel,
+                            )
+                            MainTab.COMMAND_LIST -> AdbCommandLayout(
+                                modifier = Modifier.fillMaxSize(),
+                                viewModel = adbViewModel,
+                            )
+                        }
                     }
                 }
             }
