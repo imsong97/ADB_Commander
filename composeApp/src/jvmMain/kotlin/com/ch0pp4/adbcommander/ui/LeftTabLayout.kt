@@ -29,6 +29,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun LeftTabLayout(
     selectedTab: MainTab,
+    visibleTabs: Set<MainTab>,
     onTabSelected: (MainTab) -> Unit,
     adbViewModel: AdbViewModel,
     broadcastViewModel: SendBroadcastViewModel,
@@ -48,79 +49,83 @@ fun LeftTabLayout(
 
     Column(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
         LazyColumn(modifier = Modifier.weight(1f)) {
-            item(key = "header_broadcast") {
-                TreeTabHeader(
-                    label = stringResource(Res.string.tab_send_broadcast),
-                    selected = selectedTab == MainTab.SEND_BROADCAST,
-                    onClick = {
-                        if (selectedTab == MainTab.SEND_BROADCAST) {
-                            expandedTabs = if (expandedTabs.contains(MainTab.SEND_BROADCAST))
-                                expandedTabs - MainTab.SEND_BROADCAST
-                            else
-                                expandedTabs + MainTab.SEND_BROADCAST
-                        } else {
-                            onTabSelected(MainTab.SEND_BROADCAST)
-                            expandedTabs = expandedTabs + MainTab.SEND_BROADCAST
-                        }
-                    },
-                )
-            }
-            item(key = "items_broadcast") {
-                AnimatedVisibility(
-                    visible = expandedTabs.contains(MainTab.SEND_BROADCAST),
-                    enter = expandVertically(),
-                    exit = shrinkVertically(),
-                ) {
-                    Column {
-                        broadcastState.savedItems.forEach { item ->
-                            SavedItemRow(
-                                item = item,
-                                onSelected = {
-                                    broadcastViewModel.selectItem(item)
-                                    onTabSelected(MainTab.SEND_BROADCAST)
-                                },
-                                onDeleted = { broadcastViewModel.deleteItem(item) },
-                                onRenamed = { broadcastViewModel.renameItem(item, it) },
-                            )
+            if (MainTab.SEND_BROADCAST in visibleTabs) {
+                item(key = "header_broadcast") {
+                    TreeTabHeader(
+                        label = stringResource(Res.string.tab_send_broadcast),
+                        selected = selectedTab == MainTab.SEND_BROADCAST,
+                        onClick = {
+                            if (selectedTab == MainTab.SEND_BROADCAST) {
+                                expandedTabs = if (expandedTabs.contains(MainTab.SEND_BROADCAST))
+                                    expandedTabs - MainTab.SEND_BROADCAST
+                                else
+                                    expandedTabs + MainTab.SEND_BROADCAST
+                            } else {
+                                onTabSelected(MainTab.SEND_BROADCAST)
+                                expandedTabs = expandedTabs + MainTab.SEND_BROADCAST
+                            }
+                        },
+                    )
+                }
+                item(key = "items_broadcast") {
+                    AnimatedVisibility(
+                        visible = expandedTabs.contains(MainTab.SEND_BROADCAST),
+                        enter = expandVertically(),
+                        exit = shrinkVertically(),
+                    ) {
+                        Column {
+                            broadcastState.savedItems.forEach { item ->
+                                SavedItemRow(
+                                    item = item,
+                                    onSelected = {
+                                        broadcastViewModel.selectItem(item)
+                                        onTabSelected(MainTab.SEND_BROADCAST)
+                                    },
+                                    onDeleted = { broadcastViewModel.deleteItem(item) },
+                                    onRenamed = { broadcastViewModel.renameItem(item, it) },
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            item(key = "header_command") {
-                TreeTabHeader(
-                    label = stringResource(Res.string.tab_command),
-                    selected = selectedTab == MainTab.COMMAND_LIST,
-                    onClick = {
-                        if (selectedTab == MainTab.COMMAND_LIST) {
-                            expandedTabs = if (expandedTabs.contains(MainTab.COMMAND_LIST))
-                                expandedTabs - MainTab.COMMAND_LIST
-                            else
-                                expandedTabs + MainTab.COMMAND_LIST
-                        } else {
-                            onTabSelected(MainTab.COMMAND_LIST)
-                            expandedTabs = expandedTabs + MainTab.COMMAND_LIST
-                        }
-                    },
-                )
-            }
-            item(key = "items_command") {
-                AnimatedVisibility(
-                    visible = expandedTabs.contains(MainTab.COMMAND_LIST),
-                    enter = expandVertically(),
-                    exit = shrinkVertically(),
-                ) {
-                    Column {
-                        adbState.savedItems.forEach { item ->
-                            SavedItemRow(
-                                item = item,
-                                onSelected = {
-                                    adbViewModel.selectItem(item)
-                                    onTabSelected(MainTab.COMMAND_LIST)
-                                },
-                                onDeleted = { adbViewModel.deleteItem(item) },
-                                onRenamed = { adbViewModel.renameItem(item, it) },
-                            )
+            if (MainTab.COMMAND_LIST in visibleTabs) {
+                item(key = "header_command") {
+                    TreeTabHeader(
+                        label = stringResource(Res.string.tab_command),
+                        selected = selectedTab == MainTab.COMMAND_LIST,
+                        onClick = {
+                            if (selectedTab == MainTab.COMMAND_LIST) {
+                                expandedTabs = if (expandedTabs.contains(MainTab.COMMAND_LIST))
+                                    expandedTabs - MainTab.COMMAND_LIST
+                                else
+                                    expandedTabs + MainTab.COMMAND_LIST
+                            } else {
+                                onTabSelected(MainTab.COMMAND_LIST)
+                                expandedTabs = expandedTabs + MainTab.COMMAND_LIST
+                            }
+                        },
+                    )
+                }
+                item(key = "items_command") {
+                    AnimatedVisibility(
+                        visible = expandedTabs.contains(MainTab.COMMAND_LIST),
+                        enter = expandVertically(),
+                        exit = shrinkVertically(),
+                    ) {
+                        Column {
+                            adbState.savedItems.forEach { item ->
+                                SavedItemRow(
+                                    item = item,
+                                    onSelected = {
+                                        adbViewModel.selectItem(item)
+                                        onTabSelected(MainTab.COMMAND_LIST)
+                                    },
+                                    onDeleted = { adbViewModel.deleteItem(item) },
+                                    onRenamed = { adbViewModel.renameItem(item, it) },
+                                )
+                            }
                         }
                     }
                 }
