@@ -1,5 +1,6 @@
 package com.ch0pp4.adbcommander.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import adbcommander.composeapp.generated.resources.*
@@ -86,17 +88,34 @@ fun SendBroadcastCommandLayout(
                 value = state.primaryValue,
                 onValueChange = viewModel::onPrimaryValueChange,
                 placeholder = { Text(state.commandType.actionFlagHint) },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).onKeyEvent { keyEvent ->
+                    if (keyEvent.key == Key.Enter
+                        && keyEvent.type == KeyEventType.KeyUp
+                        && state.primaryValue.isNotBlank()
+                    ) {
+                        viewModel.onRun()
+                        true
+                    } else {
+                        false
+                    }
+                },
                 singleLine = true,
             )
 
-            Button(onClick = viewModel::onRun, enabled = state.primaryValue.isNotBlank()) {
+            Button(onClick = viewModel::onRun, enabled = state.primaryValue.isNotBlank() && !state.isLoading) {
                 Text(stringResource(Res.string.btn_run))
             }
 
             OutlinedButton(onClick = viewModel::onReset, enabled = state.primaryValue.isNotBlank()) {
                 Text(stringResource(Res.string.btn_reset))
             }
+        }
+
+        AnimatedVisibility(visible = state.isLoading) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                trackColor = MaterialTheme.colorScheme.outlineVariant
+            )
         }
 
         HorizontalDivider()
@@ -110,8 +129,15 @@ fun SendBroadcastCommandLayout(
                 text = stringResource(Res.string.extras_label),
                 style = MaterialTheme.typography.titleSmall,
             )
-            IconButton(onClick = viewModel::onExtraAdd) {
-                Icon(imageVector = Icons.Outlined.Add, contentDescription = stringResource(Res.string.add_extra))
+            IconButton(
+                onClick = viewModel::onExtraAdd,
+                modifier = Modifier.size(28.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Add,
+                    contentDescription = stringResource(Res.string.add_extra),
+                    modifier = Modifier.size(24.dp),
+                )
             }
         }
 
@@ -122,7 +148,7 @@ fun SendBroadcastCommandLayout(
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
 
-        HorizontalDivider()
+//        HorizontalDivider()
 
         Text(
             text = stringResource(Res.string.completed_command),
