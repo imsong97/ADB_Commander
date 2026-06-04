@@ -8,10 +8,6 @@ import com.ch0pp4.adbcommander.presentation.model.AdbUiState
 import com.ch0pp4.adbcommander.presentation.model.SavedCommandUiModel
 import com.ch0pp4.adbcommander.presentation.model.toDisplayString
 import com.ch0pp4.adbcommander.presentation.model.toPresentation
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,10 +34,14 @@ class AdbViewModel(
     fun onRun() {
         val command = _uiState.value.command
         if (command.isBlank()) return
-        _uiState.update { it.copy(executionResult = "") }
+        _uiState.update { it.copy(executionResult = "", isLoading = true) }
         viewModelScope.launch {
-            val result = executor.execute(command).toDisplayString()
-            _uiState.update { it.copy(executionResult = result) }
+            try {
+                val result = executor.execute(command).toDisplayString()
+                _uiState.update { it.copy(executionResult = result) }
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
         }
     }
 

@@ -6,5 +6,6 @@ data class SendBroadcastUiState(
     val extras: List<BroadcastExtraUiModel> = emptyList(),
     val completedCommand: String = "",
     val executionResult: String = "",
+    val isLoading: Boolean = false,
     val savedItems: List<SavedCommandUiModel> = emptyList(),
 )

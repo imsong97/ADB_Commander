@@ -11,7 +11,6 @@ import com.ch0pp4.adbcommander.presentation.model.SendBroadcastUiState
 import com.ch0pp4.adbcommander.presentation.model.toData
 import com.ch0pp4.adbcommander.presentation.model.toDisplayString
 import com.ch0pp4.adbcommander.presentation.model.toPresentation
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,10 +70,14 @@ class SendBroadcastViewModel(
     fun onRun() {
         val command = _uiState.value.completedCommand
         if (command.isBlank()) return
-        _uiState.update { it.copy(executionResult = "") }
+        _uiState.update { it.copy(executionResult = "", isLoading = true) }
         viewModelScope.launch {
-            val result = executor.execute(command).toDisplayString()
-            _uiState.update { it.copy(executionResult = result) }
+            try {
+                val result = executor.execute(command).toDisplayString()
+                _uiState.update { it.copy(executionResult = result) }
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
         }
     }
 

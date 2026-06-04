@@ -1,5 +1,6 @@
 package com.ch0pp4.adbcommander.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -7,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
 import adbcommander.composeapp.generated.resources.*
 import com.ch0pp4.adbcommander.presentation.AdbViewModel
@@ -37,12 +39,22 @@ fun AdbCommandLayout(
                 value = state.command,
                 onValueChange = viewModel::onCommandChange,
                 placeholder = { Text(stringResource(Res.string.adb_command_hint)) },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).onKeyEvent { keyEvent ->
+                    if (keyEvent.key == Key.Enter
+                        && keyEvent.type == KeyEventType.KeyUp
+                        && state.command.isNotBlank()
+                    ) {
+                        viewModel.onRun()
+                        true
+                    } else {
+                        false
+                    }
+                },
                 singleLine = true,
             )
             Button(
                 onClick = viewModel::onRun,
-                enabled = state.command.isNotBlank(),
+                enabled = state.command.isNotBlank() && !state.isLoading,
             ) {
                 Text(stringResource(Res.string.btn_run))
             }
@@ -54,7 +66,14 @@ fun AdbCommandLayout(
             }
         }
 
-        HorizontalDivider()
+        AnimatedVisibility(visible = state.isLoading) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                trackColor = MaterialTheme.colorScheme.outlineVariant
+            )
+        }
+
+//        HorizontalDivider()
 
         Text(
             text = stringResource(Res.string.execution_result),
