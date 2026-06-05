@@ -15,6 +15,7 @@
     <string name="execution_result">Execution Result</string>
 
     <!-- Send Broadcast Screen -->
+    <string name="untitled_default">untitled</string>
     <string name="action_label">Action (-a)</string>
     <string name="broadcast_chip">broadcast</string>
     <string name="action_hint">com.example.ACTION_NAME</string>

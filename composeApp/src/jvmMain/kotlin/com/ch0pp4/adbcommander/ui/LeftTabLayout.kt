@@ -16,8 +16,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import adbcommander.composeapp.generated.resources.*
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
 import com.ch0pp4.adbcommander.presentation.AdbViewModel
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.MainTab
@@ -54,6 +61,7 @@ fun LeftTabLayout(
                     TreeTabHeader(
                         label = stringResource(Res.string.tab_send_broadcast),
                         selected = selectedTab == MainTab.SEND_BROADCAST,
+                        expanded = expandedTabs.contains(MainTab.SEND_BROADCAST),
                         onClick = {
                             if (selectedTab == MainTab.SEND_BROADCAST) {
                                 expandedTabs = if (expandedTabs.contains(MainTab.SEND_BROADCAST))
@@ -77,8 +85,10 @@ fun LeftTabLayout(
                             broadcastState.savedItems.forEach { item ->
                                 SavedItemRow(
                                     item = item,
+                                    isSelected = item.id == broadcastState.selectedItemId,
                                     onSelected = {
                                         broadcastViewModel.selectItem(item)
+                                        adbViewModel.clearSelection()
                                         onTabSelected(MainTab.SEND_BROADCAST)
                                     },
                                     onDeleted = { broadcastViewModel.deleteItem(item) },
@@ -95,6 +105,7 @@ fun LeftTabLayout(
                     TreeTabHeader(
                         label = stringResource(Res.string.tab_command),
                         selected = selectedTab == MainTab.COMMAND_LIST,
+                        expanded = expandedTabs.contains(MainTab.COMMAND_LIST),
                         onClick = {
                             if (selectedTab == MainTab.COMMAND_LIST) {
                                 expandedTabs = if (expandedTabs.contains(MainTab.COMMAND_LIST))
@@ -118,8 +129,10 @@ fun LeftTabLayout(
                             adbState.savedItems.forEach { item ->
                                 SavedItemRow(
                                     item = item,
+                                    isSelected = item.id == adbState.selectedItemId,
                                     onSelected = {
                                         adbViewModel.selectItem(item)
+                                        broadcastViewModel.clearSelection()
                                         onTabSelected(MainTab.COMMAND_LIST)
                                     },
                                     onDeleted = { adbViewModel.deleteItem(item) },
@@ -189,24 +202,31 @@ fun LeftTabLayout(
 private fun TreeTabHeader(
     label: String,
     selected: Boolean,
+    expanded: Boolean,
     onClick: () -> Unit,
 ) {
-    Box(
+    val rotation by animateFloatAsState(targetValue = if (expanded) 90f else 0f)
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                if (selected) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surface,
-            )
+            .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 8.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
+        Icon(
+            imageVector = Icons.Filled.ChevronRight,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp).graphicsLayer { rotationZ = rotation },
+            tint = MaterialTheme.colorScheme.onSurface,
+        )
         Text(
             text = label,
             style = MaterialTheme.typography.titleSmall,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                    else MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Normal,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -214,6 +234,7 @@ private fun TreeTabHeader(
 @Composable
 private fun SavedItemRow(
     item: SavedCommandUiModel,
+    isSelected: Boolean,
     onSelected: () -> Unit,
     onDeleted: () -> Unit,
     onRenamed: (String) -> Unit,
@@ -221,10 +242,14 @@ private fun SavedItemRow(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
     var renameText by remember { mutableStateOf("") }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface)
+            .hoverable(interactionSource = interactionSource)
             .clickable(onClick = onSelected)
             .padding(start = 24.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -241,7 +266,7 @@ private fun SavedItemRow(
                 renameText = item.title
                 showRenameDialog = true
             },
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(28.dp).alpha(if (isHovered) 1f else 0f),
         ) {
             Icon(
                 Icons.Outlined.Edit,
@@ -250,7 +275,10 @@ private fun SavedItemRow(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        DeleteIconButton(onClick = { showDeleteDialog = true })
+        DeleteIconButton(
+            onClick = { showDeleteDialog = true },
+            modifier = Modifier.size(28.dp).alpha(if (isHovered) 1f else 0f),
+        )
     }
 
     if (showRenameDialog) {
