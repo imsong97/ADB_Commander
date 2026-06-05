@@ -28,7 +28,10 @@ class AdbViewModel(
     }
 
     fun onCommandChange(value: String) {
-        _uiState.update { it.copy(command = value) }
+        _uiState.update { it.copy(
+            command = value,
+            isModified = if (it.selectedTitle != null) value != it.originalCommand else value.isNotBlank(),
+        ) }
     }
 
     fun onRun() {
@@ -46,7 +49,7 @@ class AdbViewModel(
     }
 
     fun onReset() {
-        _uiState.update { it.copy(command = "", executionResult = "") }
+        _uiState.update { it.copy(command = "", executionResult = "", selectedItemId = null, selectedTitle = null, originalCommand = null, isModified = false) }
     }
 
     fun saveCommand(title: String) {
@@ -78,8 +81,12 @@ class AdbViewModel(
         }
     }
 
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedItemId = null) }
+    }
+
     fun selectItem(item: SavedCommandUiModel) {
-        _uiState.update { it.copy(command = item.command, executionResult = "") }
+        _uiState.update { it.copy(command = item.command, executionResult = "", selectedItemId = item.id, selectedTitle = item.title, originalCommand = item.command, isModified = false) }
     }
 
     private fun loadSavedItems() {

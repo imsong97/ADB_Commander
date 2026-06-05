@@ -12,6 +12,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
 import adbcommander.composeapp.generated.resources.*
 import com.ch0pp4.adbcommander.presentation.AdbViewModel
+import com.ch0pp4.adbcommander.ui.components.CommandTitleRow
 import com.ch0pp4.adbcommander.ui.components.ResultBox
 import org.jetbrains.compose.resources.stringResource
 
@@ -26,9 +27,9 @@ fun AdbCommandLayout(
         modifier = modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = stringResource(Res.string.adb_command_label),
-            style = MaterialTheme.typography.titleMedium,
+        CommandTitleRow(
+            title = state.selectedTitle,
+            isModified = state.isModified,
         )
 
         Row(

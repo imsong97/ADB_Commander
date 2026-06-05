@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ContentCopy
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
+import com.ch0pp4.adbcommander.ui.components.CommandTitleRow
 import com.ch0pp4.adbcommander.ui.components.DeleteIconButton
 import com.ch0pp4.adbcommander.ui.components.ResultBox
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
@@ -41,9 +42,9 @@ fun SendBroadcastCommandLayout(
         modifier = modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = state.commandType.actionFlag,
-            style = MaterialTheme.typography.titleSmall,
+        CommandTitleRow(
+            title = state.selectedTitle,
+            isModified = state.isModified,
         )
 
         Row(
@@ -106,7 +107,7 @@ fun SendBroadcastCommandLayout(
                 Text(stringResource(Res.string.btn_run))
             }
 
-            OutlinedButton(onClick = viewModel::onReset, enabled = state.primaryValue.isNotBlank()) {
+            OutlinedButton(onClick = viewModel::onReset, enabled = state.primaryValue.isNotBlank() || state.extras.isNotEmpty()) {
                 Text(stringResource(Res.string.btn_reset))
             }
         }

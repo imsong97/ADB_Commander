@@ -33,21 +33,30 @@ class SendBroadcastViewModel(
     fun onCommandTypeChange(type: IntentCommandType) {
         _uiState.update { state ->
             val new = state.copy(commandType = type, primaryValue = "", extras = emptyList(), executionResult = "")
-            new.copy(completedCommand = buildCommand(new))
+            val withCommand = new.copy(completedCommand = buildCommand(new))
+            withCommand.copy(
+                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else false,
+            )
         }
     }
 
     fun onPrimaryValueChange(value: String) {
         _uiState.update { state ->
             val new = state.copy(primaryValue = value)
-            new.copy(completedCommand = buildCommand(new))
+            val withCommand = new.copy(completedCommand = buildCommand(new))
+            withCommand.copy(
+                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else value.isNotBlank() || state.extras.isNotEmpty(),
+            )
         }
     }
 
     fun onExtraAdd() {
         _uiState.update { state ->
             val new = state.copy(extras = state.extras + BroadcastExtraUiModel())
-            new.copy(completedCommand = buildCommand(new))
+            val withCommand = new.copy(completedCommand = buildCommand(new))
+            withCommand.copy(
+                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else true,
+            )
         }
     }
 
@@ -55,7 +64,10 @@ class SendBroadcastViewModel(
         _uiState.update { state ->
             val newExtras = state.extras.toMutableList().also { it[index] = extra }
             val new = state.copy(extras = newExtras)
-            new.copy(completedCommand = buildCommand(new))
+            val withCommand = new.copy(completedCommand = buildCommand(new))
+            withCommand.copy(
+                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else true,
+            )
         }
     }
 
@@ -63,7 +75,10 @@ class SendBroadcastViewModel(
         _uiState.update { state ->
             val newExtras = state.extras.toMutableList().also { it.removeAt(index) }
             val new = state.copy(extras = newExtras)
-            new.copy(completedCommand = buildCommand(new))
+            val withCommand = new.copy(completedCommand = buildCommand(new))
+            withCommand.copy(
+                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else state.primaryValue.isNotBlank() || newExtras.isNotEmpty(),
+            )
         }
     }
 
@@ -83,7 +98,15 @@ class SendBroadcastViewModel(
 
     fun onReset() {
         _uiState.update { state ->
-            val new = state.copy(primaryValue = "", extras = emptyList(), executionResult = "")
+            val new = state.copy(
+                primaryValue = "",
+                extras = emptyList(),
+                executionResult = "",
+                selectedItemId = null,
+                selectedTitle = null,
+                originalCompletedCommand = null,
+                isModified = false,
+            )
             new.copy(completedCommand = buildCommand(new))
         }
     }
@@ -122,6 +145,10 @@ class SendBroadcastViewModel(
         }
     }
 
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedItemId = null) }
+    }
+
     fun selectItem(item: SavedCommandUiModel) {
         val prefix = "adb shell ${item.intentType.adbCommand} ${item.intentType.actionFlag} "
         val primaryValue = item.command.removePrefix(prefix).substringBefore(" --").trim()
@@ -131,6 +158,10 @@ class SendBroadcastViewModel(
                 primaryValue = primaryValue,
                 extras = item.extras,
                 executionResult = "",
+                selectedItemId = item.id,
+                selectedTitle = item.title,
+                originalCompletedCommand = item.command,
+                isModified = false,
             )
             new.copy(completedCommand = buildCommand(new))
         }
