@@ -43,7 +43,7 @@
     <string name="dialog_delete_message">Are you sure you want to delete this command?</string>
 
     <!-- Rename Dialog -->
-    <string name="dialog_rename_title">Rename Command</string>
+    <string name="dialog_rename_title">Rename</string>
 
     <!-- Menu bar -->
     <string name="menu_view">View</string>
