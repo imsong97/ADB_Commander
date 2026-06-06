@@ -1,15 +1,23 @@
 package com.ch0pp4.adbcommander
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import java.awt.Cursor
 import androidx.lifecycle.ViewModelStore
 import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.app_name
@@ -63,10 +71,13 @@ fun main() = application {
         )
 
         AdbCommanderTheme {
+            var leftPanelWidth by remember { mutableStateOf(220.dp) }
+            val density = LocalDensity.current
+
             Surface(modifier = Modifier.fillMaxSize()) {
                 Row(modifier = Modifier.fillMaxSize()) {
                     LeftTabLayout(
-                        modifier = Modifier.width(220.dp).fillMaxHeight(),
+                        modifier = Modifier.width(leftPanelWidth).fillMaxHeight(),
                         selectedTab = selectedTab,
                         visibleTabs = visibleTabs,
                         onTabSelected = { selectedTab = it },
@@ -74,7 +85,22 @@ fun main() = application {
                         broadcastViewModel = broadcastViewModel,
                     )
 
-                    VerticalDivider()
+                    Box(
+                        modifier = Modifier
+                            .width(8.dp)
+                            .fillMaxHeight()
+                            .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
+                            .draggable(
+                                orientation = Orientation.Horizontal,
+                                state = rememberDraggableState { delta ->
+                                    val newWidth = leftPanelWidth + with(density) { delta.toDp() }
+                                    leftPanelWidth = newWidth.coerceIn(150.dp, 400.dp)
+                                }
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        VerticalDivider()
+                    }
 
                     if (visibleTabs.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize())
