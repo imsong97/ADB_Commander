@@ -1,7 +1,7 @@
 package com.ch0pp4.adbcommander.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import com.ch0pp4.adbcommander.ui.components.LoadingBar
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -116,14 +116,11 @@ fun SendBroadcastCommandLayout(
                 }
             }
 
-            AnimatedVisibility(visible = state.isLoading) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    trackColor = MaterialTheme.colorScheme.outlineVariant
-                )
+            if (state.isLoading) {
+                LoadingBar(visible = state.isLoading)
+            } else {
+                HorizontalDivider()
             }
-
-            HorizontalDivider()
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
