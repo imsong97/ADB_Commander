@@ -27,6 +27,8 @@
     <string name="extras_empty_hint">Press + to add an Extra</string>
     <string name="completed_command">Completed Command</string>
     <string name="copy_command_description">copy command</string>
+    <string name="toast_copy_success">Copied!</string>
+    <string name="toast_copy_failure">Failed to copy</string>
     <string name="add_extra">Add Extra</string>
 
     <!-- Save Dialog -->
