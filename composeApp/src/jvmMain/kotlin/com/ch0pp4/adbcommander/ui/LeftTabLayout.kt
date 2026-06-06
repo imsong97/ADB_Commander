@@ -29,6 +29,7 @@ import com.ch0pp4.adbcommander.presentation.AdbViewModel
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.MainTab
 import com.ch0pp4.adbcommander.presentation.model.SavedCommandUiModel
+import com.ch0pp4.adbcommander.ui.components.CommandNameDialog
 import com.ch0pp4.adbcommander.ui.components.DeleteIconButton
 import com.ch0pp4.adbcommander.ui.theme.LightOnSurfaceVariant
 import org.jetbrains.compose.resources.stringResource
@@ -50,8 +51,10 @@ fun LeftTabLayout(
     var expandedTabs by remember { mutableStateOf(setOf(selectedTab)) }
 
     val saveEnabled = when (selectedTab) {
-        MainTab.SEND_BROADCAST -> broadcastState.completedCommand.isNotBlank()
-        MainTab.COMMAND_LIST -> adbState.command.isNotBlank()
+        MainTab.SEND_BROADCAST -> broadcastState.completedCommand.isNotBlank() &&
+            (broadcastState.selectedItemId == null || broadcastState.isModified)
+        MainTab.COMMAND_LIST -> adbState.command.isNotBlank() &&
+            (adbState.selectedItemId == null || adbState.isModified)
     }
 
     Column(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
@@ -60,7 +63,6 @@ fun LeftTabLayout(
                 item(key = "header_broadcast") {
                     TreeTabHeader(
                         label = stringResource(Res.string.tab_send_broadcast),
-                        selected = selectedTab == MainTab.SEND_BROADCAST,
                         expanded = expandedTabs.contains(MainTab.SEND_BROADCAST),
                         onClick = {
                             if (selectedTab == MainTab.SEND_BROADCAST) {
@@ -104,7 +106,6 @@ fun LeftTabLayout(
                 item(key = "header_command") {
                     TreeTabHeader(
                         label = stringResource(Res.string.tab_command),
-                        selected = selectedTab == MainTab.COMMAND_LIST,
                         expanded = expandedTabs.contains(MainTab.COMMAND_LIST),
                         onClick = {
                             if (selectedTab == MainTab.COMMAND_LIST) {
@@ -162,38 +163,18 @@ fun LeftTabLayout(
     }
 
     if (showSaveDialog) {
-        AlertDialog(
-            onDismissRequest = {},
+        CommandNameDialog(
+            title = stringResource(Res.string.dialog_save_title),
+            confirmEnabled = saveEnabled,
             properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            title = { Text(stringResource(Res.string.dialog_save_title)) },
-            text = {
-                OutlinedTextField(
-                    value = saveDialogName,
-                    onValueChange = { saveDialogName = it },
-                    label = { Text(stringResource(Res.string.dialog_name_label)) },
-                    singleLine = true,
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    enabled = saveDialogName.isNotBlank() && saveEnabled,
-                    onClick = {
-                        when (selectedTab) {
-                            MainTab.SEND_BROADCAST -> broadcastViewModel.saveCommand(saveDialogName)
-                            MainTab.COMMAND_LIST -> adbViewModel.saveCommand(saveDialogName)
-                        }
-                        showSaveDialog = false
-                    },
-                ) { Text(stringResource(Res.string.btn_save)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showSaveDialog = false }) {
-                    Text(stringResource(Res.string.btn_cancel))
+            onConfirm = { name ->
+                when (selectedTab) {
+                    MainTab.SEND_BROADCAST -> broadcastViewModel.saveCommand(name)
+                    MainTab.COMMAND_LIST -> adbViewModel.saveCommand(name)
                 }
+                showSaveDialog = false
             },
+            onDismiss = { showSaveDialog = false },
         )
     }
 }
@@ -201,7 +182,6 @@ fun LeftTabLayout(
 @Composable
 private fun TreeTabHeader(
     label: String,
-    selected: Boolean,
     expanded: Boolean,
     onClick: () -> Unit,
 ) {
@@ -282,34 +262,14 @@ private fun SavedItemRow(
     }
 
     if (showRenameDialog) {
-        AlertDialog(
-            onDismissRequest = {},
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            title = { Text(stringResource(Res.string.dialog_rename_title)) },
-            text = {
-                OutlinedTextField(
-                    value = renameText,
-                    onValueChange = { renameText = it },
-                    label = { Text(stringResource(Res.string.dialog_name_label)) },
-                    singleLine = true,
-                )
+        CommandNameDialog(
+            title = stringResource(Res.string.dialog_rename_title),
+            initialValue = item.title,
+            onConfirm = { name ->
+                onRenamed(name)
+                showRenameDialog = false
             },
-            confirmButton = {
-                TextButton(
-                    enabled = renameText.isNotBlank(),
-                    onClick = {
-                        onRenamed(renameText)
-                        showRenameDialog = false
-                    },
-                ) { Text(stringResource(Res.string.btn_save)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showRenameDialog = false }) {
-                    Text(stringResource(Res.string.btn_cancel))
-                }
-            },
+            onDismiss = { showRenameDialog = false },
         )
     }
 

@@ -1,7 +1,7 @@
 package com.ch0pp4.adbcommander.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import com.ch0pp4.adbcommander.ui.components.LoadingBar
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,6 +24,8 @@ import java.awt.datatransfer.StringSelection
 import com.ch0pp4.adbcommander.ui.components.CommandTitleRow
 import com.ch0pp4.adbcommander.ui.components.DeleteIconButton
 import com.ch0pp4.adbcommander.ui.components.ResultBox
+import com.ch0pp4.adbcommander.ui.components.ToastHost
+import com.ch0pp4.adbcommander.ui.components.rememberToastState
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.BroadcastExtraUiModel
 import com.ch0pp4.adbcommander.presentation.model.ExtraTypeList
@@ -37,154 +39,164 @@ fun SendBroadcastCommandLayout(
 ) {
     val state by viewModel.uiState.collectAsState()
     var typeDropdownExpanded by remember { mutableStateOf(false) }
+    val toastState = rememberToastState()
 
-    Column(
-        modifier = modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        CommandTitleRow(
-            title = state.selectedTitle,
-            isModified = state.isModified,
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ToastHost(state = toastState, modifier = modifier) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Box {
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(50))
-                        .clickable { typeDropdownExpanded = true }
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = state.commandType.label,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-                DropdownMenu(
-                    expanded = typeDropdownExpanded,
-                    onDismissRequest = { typeDropdownExpanded = false },
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                ) {
-                    IntentCommandType.entries.forEach { type ->
-                        DropdownMenuItem(
-                            text = { Text(type.label, color = MaterialTheme.colorScheme.onSurface) },
-                            onClick = {
-                                viewModel.onCommandTypeChange(type)
-                                typeDropdownExpanded = false
-                            },
-                            colors = MenuDefaults.itemColors(
-                                textColor = MaterialTheme.colorScheme.onSurface,
-                            ),
+            CommandTitleRow(
+                title = state.selectedTitle,
+                isModified = state.isModified,
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Box {
+                    Box(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(50))
+                            .clickable { typeDropdownExpanded = true }
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = state.commandType.label,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     }
+                    DropdownMenu(
+                        expanded = typeDropdownExpanded,
+                        onDismissRequest = { typeDropdownExpanded = false },
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ) {
+                        IntentCommandType.entries.forEach { type ->
+                            DropdownMenuItem(
+                                text = { Text(type.label, color = MaterialTheme.colorScheme.onSurface) },
+                                onClick = {
+                                    viewModel.onCommandTypeChange(type)
+                                    typeDropdownExpanded = false
+                                },
+                                colors = MenuDefaults.itemColors(
+                                    textColor = MaterialTheme.colorScheme.onSurface,
+                                ),
+                            )
+                        }
+                    }
+                }
+
+                OutlinedTextField(
+                    value = state.primaryValue,
+                    onValueChange = viewModel::onPrimaryValueChange,
+                    placeholder = { Text(state.commandType.actionFlagHint) },
+                    modifier = Modifier.weight(1f).onKeyEvent { keyEvent ->
+                        if (keyEvent.key == Key.Enter
+                            && keyEvent.type == KeyEventType.KeyUp
+                            && state.primaryValue.isNotBlank()
+                        ) {
+                            viewModel.onRun()
+                            true
+                        } else {
+                            false
+                        }
+                    },
+                    singleLine = true,
+                )
+
+                Button(onClick = viewModel::onRun, enabled = state.primaryValue.isNotBlank() && !state.isLoading) {
+                    Text(stringResource(Res.string.btn_run))
+                }
+
+                OutlinedButton(onClick = viewModel::onReset, enabled = state.primaryValue.isNotBlank() || state.extras.isNotEmpty()) {
+                    Text(stringResource(Res.string.btn_reset))
                 }
             }
 
-            OutlinedTextField(
-                value = state.primaryValue,
-                onValueChange = viewModel::onPrimaryValueChange,
-                placeholder = { Text(state.commandType.actionFlagHint) },
-                modifier = Modifier.weight(1f).onKeyEvent { keyEvent ->
-                    if (keyEvent.key == Key.Enter
-                        && keyEvent.type == KeyEventType.KeyUp
-                        && state.primaryValue.isNotBlank()
-                    ) {
-                        viewModel.onRun()
-                        true
-                    } else {
-                        false
-                    }
-                },
-                singleLine = true,
-            )
-
-            Button(onClick = viewModel::onRun, enabled = state.primaryValue.isNotBlank() && !state.isLoading) {
-                Text(stringResource(Res.string.btn_run))
+            if (state.isLoading) {
+                LoadingBar(visible = state.isLoading)
+            } else {
+                HorizontalDivider()
             }
 
-            OutlinedButton(onClick = viewModel::onReset, enabled = state.primaryValue.isNotBlank() || state.extras.isNotEmpty()) {
-                Text(stringResource(Res.string.btn_reset))
-            }
-        }
-
-        AnimatedVisibility(visible = state.isLoading) {
-            LinearProgressIndicator(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                trackColor = MaterialTheme.colorScheme.outlineVariant
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(Res.string.extras_label),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                IconButton(
+                    onClick = viewModel::onExtraAdd,
+                    modifier = Modifier.size(28.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Add,
+                        contentDescription = stringResource(Res.string.add_extra),
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
+
+            ExtrasTable(
+                extras = state.extras,
+                onExtrasUpdate = viewModel::onExtrasUpdate,
+                onExtraDelete = viewModel::onExtraDelete,
+                modifier = Modifier.weight(1f).fillMaxWidth(),
             )
-        }
 
-        HorizontalDivider()
+    //        HorizontalDivider()
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
             Text(
-                text = stringResource(Res.string.extras_label),
+                text = stringResource(Res.string.completed_command),
                 style = MaterialTheme.typography.titleSmall,
             )
-            IconButton(
-                onClick = viewModel::onExtraAdd,
-                modifier = Modifier.size(28.dp),
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = stringResource(Res.string.add_extra),
-                    modifier = Modifier.size(24.dp),
+                ResultBox(
+                    text = state.completedCommand,
+                    modifier = Modifier.weight(1f),
+                    selectable = true,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
                 )
+                val successMsg = stringResource(Res.string.toast_copy_success)
+                val failureMsg = stringResource(Res.string.toast_copy_failure)
+                IconButton(
+                    onClick = {
+                        try {
+                            Toolkit.getDefaultToolkit().systemClipboard
+                                .setContents(StringSelection(state.completedCommand), null)
+                            toastState.show(successMsg)
+                        } catch (e: Exception) {
+                            toastState.show(failureMsg)
+                        }
+                    },
+                    enabled = state.completedCommand.isNotBlank(),
+                ) {
+                    Icon(Icons.Outlined.ContentCopy, contentDescription = stringResource(Res.string.copy_command_description))
+                }
             }
-        }
 
-        ExtrasTable(
-            extras = state.extras,
-            onExtrasUpdate = viewModel::onExtrasUpdate,
-            onExtraDelete = viewModel::onExtraDelete,
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-        )
-
-//        HorizontalDivider()
-
-        Text(
-            text = stringResource(Res.string.completed_command),
-            style = MaterialTheme.typography.titleSmall,
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            ResultBox(
-                text = state.completedCommand,
-                modifier = Modifier.weight(1f),
-                selectable = true,
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+            Text(
+                text = stringResource(Res.string.execution_result),
+                style = MaterialTheme.typography.titleSmall,
             )
-            IconButton(onClick = {
-                Toolkit.getDefaultToolkit().systemClipboard
-                    .setContents(StringSelection(state.completedCommand), null)
-            }) {
-                Icon(Icons.Outlined.ContentCopy, contentDescription = stringResource(Res.string.copy_command_description))
-            }
+
+            ResultBox(
+                text = state.executionResult,
+                modifier = Modifier.fillMaxWidth().height(80.dp),
+                scrollable = true,
+            )
         }
-
-        Text(
-            text = stringResource(Res.string.execution_result),
-            style = MaterialTheme.typography.titleSmall,
-        )
-
-        ResultBox(
-            text = state.executionResult,
-            modifier = Modifier.fillMaxWidth().height(80.dp),
-            scrollable = true,
-        )
     }
 }
 

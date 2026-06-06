@@ -1,7 +1,7 @@
 package com.ch0pp4.adbcommander.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
+import com.ch0pp4.adbcommander.ui.components.LoadingBar
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -67,12 +67,7 @@ fun AdbCommandLayout(
             }
         }
 
-        AnimatedVisibility(visible = state.isLoading) {
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth(),
-                trackColor = MaterialTheme.colorScheme.outlineVariant
-            )
-        }
+        LoadingBar(visible = state.isLoading)
 
 //        HorizontalDivider()
 
