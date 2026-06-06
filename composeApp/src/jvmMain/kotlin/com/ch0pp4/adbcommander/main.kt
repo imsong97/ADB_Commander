@@ -20,6 +20,7 @@ import androidx.compose.ui.window.rememberWindowState
 import java.awt.Cursor
 import androidx.lifecycle.ViewModelStore
 import adbcommander.composeapp.generated.resources.Res
+import adbcommander.composeapp.generated.resources.adb_commander_icon
 import adbcommander.composeapp.generated.resources.app_name
 import com.ch0pp4.adbcommander.local.database.DatabaseFactory
 import com.ch0pp4.adbcommander.di.AppContainer
@@ -32,6 +33,7 @@ import com.ch0pp4.adbcommander.ui.AppMenuBar
 import com.ch0pp4.adbcommander.ui.LeftTabLayout
 import com.ch0pp4.adbcommander.ui.SendBroadcastCommandLayout
 import com.ch0pp4.adbcommander.ui.theme.AdbCommanderTheme
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 fun main() = application {
@@ -47,6 +49,7 @@ fun main() = application {
             viewModelStore.clear()
         },
         title = stringResource(Res.string.app_name),
+        icon = painterResource(Res.drawable.adb_commander_icon),
         state = windowState,
     ) {
         val adbViewModel: AdbViewModel = remember(key1 = viewModelStore, key2 = appContainer) {
