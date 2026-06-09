@@ -5,9 +5,9 @@ import com.ch0pp4.adbcommander.local.database.SavedCommandEntity
 import com.ch0pp4.adbcommander.local.database.SavedCommandExtraEntity
 import com.ch0pp4.adbcommander.local.database.SavedCommandTable
 import com.ch0pp4.adbcommander.local.database.SourceTab
+import com.ch0pp4.adbcommander.local.database.toDataModel
 import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
 import com.ch0pp4.adbcommander.data.model.BroadcastExtra
-import com.ch0pp4.adbcommander.data.model.ExtraType
 import com.ch0pp4.adbcommander.data.model.IntentCommandType
 import com.ch0pp4.adbcommander.data.model.SavedCommand
 import kotlinx.coroutines.CoroutineDispatcher
@@ -63,28 +63,7 @@ class LocalDataSourceImpl(
             SavedCommandEntity
                 .find { SavedCommandTable.sourceTab eq tab }
                 .orderBy(SavedCommandTable.createdAt to SortOrder.ASC)
-                .map { entity ->
-                    SavedCommand(
-                        id = entity.id.value,
-                        title = entity.title,
-                        command = entity.command,
-                        sourceTab = entity.sourceTab.name,
-                        intentType = when (entity.intentType) {
-                            IntentType.BROADCAST -> IntentCommandType.BROADCAST
-                            IntentType.START -> IntentCommandType.START
-                            IntentType.STARTSERVICE -> IntentCommandType.START_SERVICE
-                            else -> IntentCommandType.BROADCAST
-                        },
-                        isDefault = entity.isDefault,
-                        extras = entity.extras.map { extra ->
-                            BroadcastExtra(
-                                type = ExtraType.valueOf(extra.extraType),
-                                extra = extra.extra,
-                                value = extra.value,
-                            )
-                        },
-                    )
-                }
+                .map { it.toDataModel() }
         }
     }
 
