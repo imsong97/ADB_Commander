@@ -36,6 +36,8 @@
     <string name="dialog_name_label">Name</string>
     <string name="btn_save">Save</string>
     <string name="btn_cancel">Cancel</string>
+    <string name="save_option_update">Update current item</string>
+    <string name="save_option_new">Save as new</string>
     <string name="btn_delete">Delete</string>
 
     <!-- Delete Dialog -->

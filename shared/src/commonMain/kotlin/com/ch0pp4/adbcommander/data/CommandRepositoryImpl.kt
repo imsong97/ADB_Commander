@@ -39,4 +39,12 @@ class CommandRepositoryImpl(
 
     override suspend fun renameCommand(id: Int, title: String): Int =
         localDataSource.updateTitle(id, title)
+
+    override suspend fun updateCommand(
+        id: Int,
+        title: String,
+        command: String,
+        intentType: IntentCommandType?,
+        extras: List<BroadcastExtra>,
+    ): Int = localDataSource.updateContent(id, title, command, intentType, extras)
 }

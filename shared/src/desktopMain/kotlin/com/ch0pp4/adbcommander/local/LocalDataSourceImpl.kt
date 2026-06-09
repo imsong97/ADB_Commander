@@ -83,4 +83,35 @@ class LocalDataSourceImpl(
             1
         }
     }
+
+    override suspend fun updateContent(
+        id: Int,
+        title: String,
+        command: String,
+        intentType: IntentCommandType?,
+        extras: List<BroadcastExtra>,
+    ): Int = withContext(context = dispatcher) {
+        transaction {
+            val entity = SavedCommandEntity.findById(id) ?: return@transaction 0
+            entity.title = title
+            entity.command = command
+            if (intentType != null) {
+                entity.intentType = when (intentType) {
+                    IntentCommandType.BROADCAST -> IntentType.BROADCAST
+                    IntentCommandType.START -> IntentType.START
+                    IntentCommandType.START_SERVICE -> IntentType.STARTSERVICE
+                }
+            }
+            entity.extras.forEach { it.delete() }
+            extras.forEach { extra ->
+                SavedCommandExtraEntity.new {
+                    this.savedCommand = entity
+                    this.extraType = extra.type.name
+                    this.extra = extra.extra
+                    this.value = extra.value
+                }
+            }
+            1
+        }
+    }
 }
