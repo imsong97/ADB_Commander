@@ -111,6 +111,25 @@ class SendBroadcastViewModel(
         }
     }
 
+    fun updateCommand(id: Int, title: String) {
+        val state = _uiState.value
+        viewModelScope.launch {
+            try {
+                commandRepository.updateCommand(
+                    id = id,
+                    title = title,
+                    command = state.completedCommand,
+                    intentType = state.commandType.toData(),
+                    extras = state.extras.map { it.toData() },
+                )
+                loadSavedItems()
+                _uiState.update { it.copy(selectedTitle = title, originalCompletedCommand = state.completedCommand, isModified = false) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun saveCommand(title: String) {
         val state = _uiState.value
         if (title.isBlank()) return

@@ -47,7 +47,6 @@ fun LeftTabLayout(
     val adbState by adbViewModel.uiState.collectAsState()
 
     var showSaveDialog by remember { mutableStateOf(false) }
-    var saveDialogName by remember { mutableStateOf("") }
     var expandedTabs by remember { mutableStateOf(setOf(selectedTab)) }
 
     val saveEnabled = when (selectedTab) {
@@ -55,6 +54,16 @@ fun LeftTabLayout(
             (broadcastState.selectedItemId == null || broadcastState.isModified)
         MainTab.COMMAND_LIST -> adbState.command.isNotBlank() &&
             (adbState.selectedItemId == null || adbState.isModified)
+    }
+
+    val showUpdateOption = when (selectedTab) {
+        MainTab.SEND_BROADCAST -> broadcastState.selectedItemId != null && broadcastState.isModified
+        MainTab.COMMAND_LIST -> adbState.selectedItemId != null && adbState.isModified
+    }
+
+    val currentTitle = when (selectedTab) {
+        MainTab.SEND_BROADCAST -> broadcastState.selectedTitle ?: ""
+        MainTab.COMMAND_LIST -> adbState.selectedTitle ?: ""
     }
 
     Column(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
@@ -148,10 +157,7 @@ fun LeftTabLayout(
 
         HorizontalDivider()
         TextButton(
-            onClick = {
-                saveDialogName = ""
-                showSaveDialog = true
-            },
+            onClick = { showSaveDialog = true },
             enabled = saveEnabled,
             modifier = Modifier.fillMaxWidth().padding(4.dp),
         ) {
@@ -165,12 +171,27 @@ fun LeftTabLayout(
     if (showSaveDialog) {
         CommandNameDialog(
             title = stringResource(Res.string.dialog_save_title),
+            initialValue = if (showUpdateOption) currentTitle else "",
             confirmEnabled = saveEnabled,
+            showUpdateOption = showUpdateOption,
             properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
             onConfirm = { name ->
                 when (selectedTab) {
                     MainTab.SEND_BROADCAST -> broadcastViewModel.saveCommand(name)
                     MainTab.COMMAND_LIST -> adbViewModel.saveCommand(name)
+                }
+                showSaveDialog = false
+            },
+            onConfirmUpdate = { name ->
+                when (selectedTab) {
+                    MainTab.SEND_BROADCAST -> {
+                        val id = broadcastState.selectedItemId ?: return@CommandNameDialog
+                        broadcastViewModel.updateCommand(id, name)
+                    }
+                    MainTab.COMMAND_LIST -> {
+                        val id = adbState.selectedItemId ?: return@CommandNameDialog
+                        adbViewModel.updateCommand(id, name)
+                    }
                 }
                 showSaveDialog = false
             },

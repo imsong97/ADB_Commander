@@ -52,6 +52,19 @@ class AdbViewModel(
         _uiState.update { it.copy(command = "", executionResult = "", selectedItemId = null, selectedTitle = null, originalCommand = null, isModified = false) }
     }
 
+    fun updateCommand(id: Int, title: String) {
+        val command = _uiState.value.command
+        viewModelScope.launch {
+            try {
+                commandRepository.updateCommand(id = id, title = title, command = command)
+                loadSavedItems()
+                _uiState.update { it.copy(selectedTitle = title, originalCommand = command, isModified = false) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun saveCommand(title: String) {
         val command = _uiState.value.command
         if (title.isBlank() || command.isBlank()) return

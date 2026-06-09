@@ -15,4 +15,11 @@ interface CommandRepository {
     suspend fun getByTab(sourceTab: String): List<SavedCommand>
     suspend fun deleteById(id: Int): Int
     suspend fun renameCommand(id: Int, title: String): Int
+    suspend fun updateCommand(
+        id: Int,
+        title: String,
+        command: String,
+        intentType: IntentCommandType? = null,
+        extras: List<BroadcastExtra> = emptyList(),
+    ): Int
 }

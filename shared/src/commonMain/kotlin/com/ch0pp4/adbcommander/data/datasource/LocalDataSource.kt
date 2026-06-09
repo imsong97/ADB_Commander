@@ -14,4 +14,11 @@ interface LocalDataSource {
     suspend fun getByTab(sourceTab: String): List<SavedCommand>
     suspend fun deleteById(id: Int): Int
     suspend fun updateTitle(id: Int, title: String): Int
+    suspend fun updateContent(
+        id: Int,
+        title: String,
+        command: String,
+        intentType: IntentCommandType? = null,
+        extras: List<BroadcastExtra> = emptyList(),
+    ): Int
 }
