@@ -48,10 +48,6 @@ class AdbViewModel(
         }
     }
 
-    fun onReset() {
-        _uiState.update { it.copy(command = "", executionResult = "", selectedItemId = null, selectedTitle = null, originalCommand = null, isModified = false) }
-    }
-
     fun updateCommand(id: Int, title: String) {
         val command = _uiState.value.command
         viewModelScope.launch {
@@ -79,11 +75,8 @@ class AdbViewModel(
         }
     }
 
-    fun deleteItem(item: SavedCommandUiModel) {
-        viewModelScope.launch {
-            commandRepository.deleteById(item.id)
-            loadSavedItems()
-        }
+    fun selectItem(item: SavedCommandUiModel) {
+        _uiState.update { it.copy(command = item.command, executionResult = "", selectedItemId = item.id, selectedTitle = item.title, originalCommand = item.command, isModified = false) }
     }
 
     fun renameItem(item: SavedCommandUiModel, newTitle: String) {
@@ -94,12 +87,19 @@ class AdbViewModel(
         }
     }
 
-    fun clearSelection() {
-        _uiState.update { it.copy(selectedItemId = null) }
+    fun deleteItem(item: SavedCommandUiModel) {
+        viewModelScope.launch {
+            commandRepository.deleteById(item.id)
+            loadSavedItems()
+        }
     }
 
-    fun selectItem(item: SavedCommandUiModel) {
-        _uiState.update { it.copy(command = item.command, executionResult = "", selectedItemId = item.id, selectedTitle = item.title, originalCommand = item.command, isModified = false) }
+    fun onReset() {
+        _uiState.update { it.copy(command = "", executionResult = "", selectedItemId = null, selectedTitle = null, originalCommand = null, isModified = false) }
+    }
+
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedItemId = null) }
     }
 
     private fun loadSavedItems() {
