@@ -50,38 +50,6 @@ class SendBroadcastViewModel(
         }
     }
 
-    fun onExtraAdd() {
-        _uiState.update { state ->
-            val new = state.copy(extras = state.extras + BroadcastExtraUiModel())
-            val withCommand = new.copy(completedCommand = buildCommand(new))
-            withCommand.copy(
-                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else true,
-            )
-        }
-    }
-
-    fun onExtrasUpdate(index: Int, extra: BroadcastExtraUiModel) {
-        _uiState.update { state ->
-            val newExtras = state.extras.toMutableList().also { it[index] = extra }
-            val new = state.copy(extras = newExtras)
-            val withCommand = new.copy(completedCommand = buildCommand(new))
-            withCommand.copy(
-                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else true,
-            )
-        }
-    }
-
-    fun onExtraDelete(index: Int) {
-        _uiState.update { state ->
-            val newExtras = state.extras.toMutableList().also { it.removeAt(index) }
-            val new = state.copy(extras = newExtras)
-            val withCommand = new.copy(completedCommand = buildCommand(new))
-            withCommand.copy(
-                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else state.primaryValue.isNotBlank() || newExtras.isNotEmpty(),
-            )
-        }
-    }
-
     fun onRun() {
         val command = _uiState.value.completedCommand
         if (command.isBlank()) return
@@ -93,21 +61,6 @@ class SendBroadcastViewModel(
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
-        }
-    }
-
-    fun onReset() {
-        _uiState.update { state ->
-            val new = state.copy(
-                primaryValue = "",
-                extras = emptyList(),
-                executionResult = "",
-                selectedItemId = null,
-                selectedTitle = null,
-                originalCompletedCommand = null,
-                isModified = false,
-            )
-            new.copy(completedCommand = buildCommand(new))
         }
     }
 
@@ -149,10 +102,35 @@ class SendBroadcastViewModel(
         }
     }
 
-    fun deleteItem(item: SavedCommandUiModel) {
-        viewModelScope.launch {
-            commandRepository.deleteById(item.id)
-            loadSavedItems()
+    fun onExtraAdd() {
+        _uiState.update { state ->
+            val new = state.copy(extras = state.extras + BroadcastExtraUiModel())
+            val withCommand = new.copy(completedCommand = buildCommand(new))
+            withCommand.copy(
+                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else true,
+            )
+        }
+    }
+
+    fun onExtrasUpdate(index: Int, extra: BroadcastExtraUiModel) {
+        _uiState.update { state ->
+            val newExtras = state.extras.toMutableList().also { it[index] = extra }
+            val new = state.copy(extras = newExtras)
+            val withCommand = new.copy(completedCommand = buildCommand(new))
+            withCommand.copy(
+                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else true,
+            )
+        }
+    }
+
+    fun onExtraDelete(index: Int) {
+        _uiState.update { state ->
+            val newExtras = state.extras.toMutableList().also { it.removeAt(index) }
+            val new = state.copy(extras = newExtras)
+            val withCommand = new.copy(completedCommand = buildCommand(new))
+            withCommand.copy(
+                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else state.primaryValue.isNotBlank() || newExtras.isNotEmpty(),
+            )
         }
     }
 
@@ -162,10 +140,6 @@ class SendBroadcastViewModel(
             commandRepository.renameCommand(item.id, newTitle)
             loadSavedItems()
         }
-    }
-
-    fun clearSelection() {
-        _uiState.update { it.copy(selectedItemId = null) }
     }
 
     fun selectItem(item: SavedCommandUiModel) {
@@ -184,6 +158,32 @@ class SendBroadcastViewModel(
             )
             new.copy(completedCommand = buildCommand(new))
         }
+    }
+
+    fun deleteItem(item: SavedCommandUiModel) {
+        viewModelScope.launch {
+            commandRepository.deleteById(item.id)
+            loadSavedItems()
+        }
+    }
+
+    fun onReset() {
+        _uiState.update { state ->
+            val new = state.copy(
+                primaryValue = "",
+                extras = emptyList(),
+                executionResult = "",
+                selectedItemId = null,
+                selectedTitle = null,
+                originalCompletedCommand = null,
+                isModified = false,
+            )
+            new.copy(completedCommand = buildCommand(new))
+        }
+    }
+
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedItemId = null) }
     }
 
     private fun loadSavedItems() {

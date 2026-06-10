@@ -81,6 +81,7 @@ fun LeftTabLayout(
                                     expandedTabs + MainTab.SEND_BROADCAST
                             } else {
                                 broadcastViewModel.onReset()
+                                adbViewModel.clearSelection()
                                 onTabSelected(MainTab.SEND_BROADCAST)
                                 expandedTabs = expandedTabs + MainTab.SEND_BROADCAST
                             }
@@ -125,6 +126,7 @@ fun LeftTabLayout(
                                     expandedTabs + MainTab.COMMAND_LIST
                             } else {
                                 adbViewModel.onReset()
+                                broadcastViewModel.clearSelection()
                                 onTabSelected(MainTab.COMMAND_LIST)
                                 expandedTabs = expandedTabs + MainTab.COMMAND_LIST
                             }
