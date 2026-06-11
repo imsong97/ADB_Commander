@@ -7,6 +7,7 @@ val PostmanOrange = Color(0xFFFF6C37)
 val OnOrange = Color(0xFFFFFFFF)
 
 // Light palette (Postman light)
+val LightSidebarSelected = Color(0xFFF5F5F5)
 val LightPrimaryContainer = Color(0xFFFFF0EB)
 val LightOnPrimaryContainer = Color(0xFFCC4A1A)
 val LightBackground = Color(0xFFF9F9F9)
