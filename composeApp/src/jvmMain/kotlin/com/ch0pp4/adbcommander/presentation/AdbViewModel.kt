@@ -28,10 +28,12 @@ class AdbViewModel(
     }
 
     fun onCommandChange(value: String) {
-        _uiState.update { it.copy(
-            command = value,
-            isModified = if (it.selectedTitle != null) value != it.originalCommand else value.isNotBlank(),
-        ) }
+        _uiState.update { 
+            it.copy(
+                command = value,
+                isModified = if (it.selectedTitle != null) value != it.originalCommand else value.isNotBlank(),
+            )
+        }
     }
 
     fun onRun() {

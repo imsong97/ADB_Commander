@@ -4,6 +4,9 @@ import androidx.compose.foundation.background
 import com.ch0pp4.adbcommander.ui.components.LoadingBar
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -30,6 +33,7 @@ import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.BroadcastExtraUiModel
 import com.ch0pp4.adbcommander.presentation.model.ExtraTypeList
 import com.ch0pp4.adbcommander.presentation.model.IntentCommandType
+import com.ch0pp4.adbcommander.ui.theme.LightPrimaryContainerHover
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -56,10 +60,16 @@ fun SendBroadcastCommandLayout(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box {
+                    val buttonInteraction = remember { MutableInteractionSource() }
+                    val isButtonHovered by buttonInteraction.collectIsHoveredAsState()
                     Box(
                         modifier = Modifier
-                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(50))
-                            .clickable { typeDropdownExpanded = true }
+                            .background(
+                                color = if (isButtonHovered) LightPrimaryContainerHover else MaterialTheme.colorScheme.primaryContainer,
+                                shape = RoundedCornerShape(50),
+                            )
+                            .hoverable(buttonInteraction)
+                            .clickable(interactionSource = buttonInteraction, indication = null) { typeDropdownExpanded = true }
                             .padding(horizontal = 12.dp, vertical = 10.dp),
                         contentAlignment = Alignment.Center,
                     ) {

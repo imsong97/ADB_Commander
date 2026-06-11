@@ -27,33 +27,11 @@ class AppContainer {
         CommandRepositoryImpl(localDataSource)
     }
 
-    fun getAdbViewModel(viewModelStore: ViewModelStore): AdbViewModel = VMProvider(
-        store = viewModelStore,
-        instance = AdbViewModel(commandRepository, adbExecutor)
-    )
-
-    fun getSendBroadcastViewModel(viewModelStore: ViewModelStore): SendBroadcastViewModel = VMProvider(
-        store = viewModelStore,
-        instance = SendBroadcastViewModel(commandRepository, adbExecutor)
-    )
-}
-
-@Suppress("UNCHECKED_CAST")
-private fun <T : ViewModel> VMProvider(
-    store: ViewModelStore,
-    instance: ViewModel
-): T {
-    val owner = object : ViewModelStoreOwner {
-        override val viewModelStore: ViewModelStore = store
+    val adbViewModel: AdbViewModel by lazy {
+        AdbViewModel(commandRepository, adbExecutor)
     }
-    val factory = object : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
-            return if (modelClass.isInstance(instance)) {
-                instance as T
-            } else {
-                throw IllegalArgumentException("Unknown ViewModel: ${modelClass.qualifiedName}")
-            }
-        }
+
+    val sendBroadcastViewModel: SendBroadcastViewModel by lazy {
+        SendBroadcastViewModel(commandRepository, adbExecutor)
     }
-    return ViewModelProvider.create(owner, factory)[(instance as T)::class]
 }

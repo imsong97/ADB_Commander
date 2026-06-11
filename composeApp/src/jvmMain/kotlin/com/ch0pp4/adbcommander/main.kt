@@ -25,6 +25,7 @@ import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.adb_commander_icon
 import adbcommander.composeapp.generated.resources.app_name
 import androidx.compose.material3.MaterialTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ch0pp4.adbcommander.local.database.DatabaseFactory
 import com.ch0pp4.adbcommander.di.AppContainer
 import com.ch0pp4.adbcommander.preference.AppPreferences
@@ -55,12 +56,8 @@ fun main() = application {
         icon = painterResource(Res.drawable.adb_commander_icon),
         state = windowState,
     ) {
-        val adbViewModel: AdbViewModel = remember(key1 = viewModelStore, key2 = appContainer) {
-            appContainer.getAdbViewModel(viewModelStore)
-        }
-        val broadcastViewModel: SendBroadcastViewModel = remember(key1 = viewModelStore, key2 = appContainer) {
-            appContainer.getSendBroadcastViewModel(viewModelStore)
-        }
+        val adbViewModel: AdbViewModel = viewModel { appContainer.adbViewModel }
+        val broadcastViewModel: SendBroadcastViewModel = viewModel { appContainer.sendBroadcastViewModel }
         var selectedTab by remember { mutableStateOf(MainTab.SEND_BROADCAST) }
         var visibleTabs by remember { mutableStateOf(appPreferences.getVisibleTabs()) }
 
