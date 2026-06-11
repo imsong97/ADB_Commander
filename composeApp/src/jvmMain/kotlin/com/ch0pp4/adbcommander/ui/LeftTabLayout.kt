@@ -23,7 +23,10 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import com.ch0pp4.adbcommander.presentation.AdbViewModel
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
@@ -32,6 +35,7 @@ import com.ch0pp4.adbcommander.presentation.model.SavedCommandUiModel
 import com.ch0pp4.adbcommander.ui.components.CommandNameDialog
 import com.ch0pp4.adbcommander.ui.components.DeleteIconButton
 import com.ch0pp4.adbcommander.ui.theme.LightOnSurfaceVariant
+import com.ch0pp4.adbcommander.ui.theme.LightSidebarSelected
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -253,16 +257,22 @@ private fun SavedItemRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+            .background(
+                color = if (isSelected) LightSidebarSelected else Color.Transparent,
+                shape = RoundedCornerShape(8.dp),
+            )
+            .clip(RoundedCornerShape(8.dp))
             .hoverable(interactionSource = interactionSource)
             .clickable(onClick = onSelected)
-            .padding(start = 24.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
+            .padding(start = 18.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = item.title,
-            modifier = Modifier.weight(1f).padding(top = 8.dp, bottom = 8.dp),
+            modifier = Modifier.weight(1f).padding(top = 6.dp, bottom = 6.dp),
             style = MaterialTheme.typography.bodyMedium,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

@@ -1,14 +1,16 @@
 package com.ch0pp4.adbcommander
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
@@ -22,6 +24,7 @@ import androidx.lifecycle.ViewModelStore
 import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.adb_commander_icon
 import adbcommander.composeapp.generated.resources.app_name
+import androidx.compose.material3.MaterialTheme
 import com.ch0pp4.adbcommander.local.database.DatabaseFactory
 import com.ch0pp4.adbcommander.di.AppContainer
 import com.ch0pp4.adbcommander.preference.AppPreferences
@@ -80,7 +83,16 @@ fun main() = application {
             Surface(modifier = Modifier.fillMaxSize()) {
                 Row(modifier = Modifier.fillMaxSize()) {
                     LeftTabLayout(
-                        modifier = Modifier.width(leftPanelWidth).fillMaxHeight(),
+                        modifier = Modifier
+                            .width(leftPanelWidth)
+                            .fillMaxHeight()
+                            .padding(top = 8.dp, start = 8.dp, bottom = 8.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = RoundedCornerShape(12.dp),
+                            ),
                         selectedTab = selectedTab,
                         visibleTabs = visibleTabs,
                         onTabSelected = { selectedTab = it },
@@ -100,10 +112,7 @@ fun main() = application {
                                     leftPanelWidth = newWidth.coerceIn(150.dp, 400.dp)
                                 }
                             ),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        VerticalDivider()
-                    }
+                    )
 
                     if (visibleTabs.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize())
