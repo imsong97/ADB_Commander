@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -70,8 +69,14 @@ fun main() = application {
                 val newVisible = if (checked) visibleTabs + tab else visibleTabs - tab
                 visibleTabs = newVisible
                 appPreferences.setTabVisible(tab, checked)
-                if (!checked && selectedTab == tab) {
-                    newVisible.firstOrNull()?.let { selectedTab = it }
+                if (selectedTab !in newVisible) {
+                    newVisible.firstOrNull()?.let { newTab ->
+                        when (selectedTab) {
+                            MainTab.SEND_BROADCAST -> broadcastViewModel.clearSelection()
+                            MainTab.COMMAND_LIST -> adbViewModel.clearSelection()
+                        }
+                        selectedTab = newTab
+                    }
                 }
             },
         )
@@ -102,7 +107,7 @@ fun main() = application {
 
                     Box(
                         modifier = Modifier
-                            .width(8.dp)
+                            .width(4.dp)
                             .fillMaxHeight()
                             .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                             .draggable(
