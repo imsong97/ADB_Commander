@@ -12,7 +12,7 @@ class JvmAdbExecutor(
 ) : AdbExecutor {
 
     override suspend fun execute(rawCommand: String): AdbResult = withContext(context = dispatcher) {
-        if (rawCommand.isBlank()) return@withContext AdbResult.Empty
+        if (rawCommand.isBlank()) return@withContext AdbResult.Error("Command is empty!!")
 
         var process: Process? = null
         try {
@@ -33,8 +33,9 @@ class JvmAdbExecutor(
                 return@withContext AdbResult.Error("Command timed out (30s)")
             }
 
-            val output = outputDeferred.await()
-            if (output.isBlank()) AdbResult.Empty else AdbResult.Success(output)
+            val output = outputDeferred.await().ifEmpty { "SUCCESS" }
+
+            AdbResult.Success(output)
         } catch (e: Exception) {
             process?.destroyForcibly()
             AdbResult.Error(message = e.message ?: "JvmAdbExecutor - Unknown error")
