@@ -74,7 +74,7 @@ class SendBroadcastViewModel(
                     command = state.completedCommand,
                     intentType = state.commandType.toData(),
                     extras = state.extras.map { it.toData() },
-                ) // toData() returns null for ADB — CommandRepository accepts nullable intentType
+                )
                 loadSavedItems()
                 _uiState.update { it.copy(selectedTitle = title, originalCompletedCommand = state.completedCommand, isModified = false) }
             } catch (e: Exception) {

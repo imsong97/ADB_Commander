@@ -26,6 +26,7 @@ interface LocalDataSource {
     suspend fun saveCollection(name: String): Int
     suspend fun getAllCollections(): List<Collection>
     suspend fun deleteCollection(id: Int): Int
+    suspend fun renameCollection(id: Int, name: String): Int
     suspend fun saveCollectionCommand(
         collectionId: Int,
         title: String,

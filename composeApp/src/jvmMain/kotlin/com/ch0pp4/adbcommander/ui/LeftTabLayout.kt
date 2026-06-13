@@ -20,7 +20,7 @@ import com.ch0pp4.adbcommander.presentation.CollectionViewModel
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.MainTab
 import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
-import com.ch0pp4.adbcommander.ui.components.CommandNameDialog
+import com.ch0pp4.adbcommander.ui.components.RenameDialog
 import com.ch0pp4.adbcommander.ui.components.CreateCollectionDialog
 import com.ch0pp4.adbcommander.ui.components.DeleteConfirmDialog
 import com.ch0pp4.adbcommander.ui.components.TabSection
@@ -51,6 +51,7 @@ fun LeftTabLayout(
     var expandedCollections by remember { mutableStateOf(setOf<Int>()) }
     var showCreateCollectionDialog by remember { mutableStateOf(false) }
     var deleteTargetCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
+    var renameTargetCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
 
     LaunchedEffect(selectedCollection) {
         // null(다른 탭으로 이동)이면 expandedCollections 그대로 유지
@@ -147,6 +148,7 @@ fun LeftTabLayout(
                     },
                     onItemDeleted = { collectionCommandViewModel.deleteItem(it) },
                     onItemRenamed = { item, title -> collectionCommandViewModel.renameItem(item, title) },
+                    onRenameClick = { renameTargetCollection = collection },
                     onDeleteClick = { deleteTargetCollection = collection },
                 )
             }
@@ -241,6 +243,18 @@ fun LeftTabLayout(
         )
     }
 
+    renameTargetCollection?.let { target ->
+        RenameDialog(
+            title = stringResource(Res.string.dialog_rename_title),
+            initialValue = target.name,
+            onConfirm = { name ->
+                collectionViewModel.renameCollection(target.id, name)
+                renameTargetCollection = null
+            },
+            onDismiss = { renameTargetCollection = null },
+        )
+    }
+
     deleteTargetCollection?.let { target ->
         DeleteConfirmDialog(
             title = stringResource(Res.string.dialog_delete_collection_title),
@@ -258,7 +272,7 @@ fun LeftTabLayout(
     }
 
     if (showSaveDialog) {
-        CommandNameDialog(
+        RenameDialog(
             title = stringResource(Res.string.dialog_save_title),
             initialValue = if (showUpdateOption) currentTitle else "",
             confirmEnabled = saveEnabled,
@@ -277,16 +291,16 @@ fun LeftTabLayout(
             onConfirmUpdate = { name ->
                 when {
                     selectedCollection != null -> {
-                        val id = collectionCommandState.selectedItemId ?: return@CommandNameDialog
+                        val id = collectionCommandState.selectedItemId ?: return@RenameDialog
                         collectionCommandViewModel.updateCommand(id, name)
                     }
                     else -> when (selectedTab) {
                         MainTab.SEND_BROADCAST -> {
-                            val id = broadcastState.selectedItemId ?: return@CommandNameDialog
+                            val id = broadcastState.selectedItemId ?: return@RenameDialog
                             broadcastViewModel.updateCommand(id, name)
                         }
                         MainTab.COMMAND_LIST -> {
-                            val id = adbState.selectedItemId ?: return@CommandNameDialog
+                            val id = adbState.selectedItemId ?: return@RenameDialog
                             adbViewModel.updateCommand(id, name)
                         }
                     }

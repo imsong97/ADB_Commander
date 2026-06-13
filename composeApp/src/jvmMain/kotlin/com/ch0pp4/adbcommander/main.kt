@@ -69,6 +69,10 @@ fun main() = application {
         val userCollections by collectionViewModel.collections.collectAsState()
         var hiddenCollectionIds by remember { mutableStateOf(setOf<Int>()) }
 
+        LaunchedEffect(userCollections) {
+            selectedCollection = userCollections.find { it.id == selectedCollection?.id }
+        }
+
         AppMenuBar(
             visibleTabs = visibleTabs,
             userCollections = userCollections,

@@ -34,7 +34,7 @@ import org.jetbrains.compose.resources.stringResource
 private enum class SaveOption { UPDATE, NEW }
 
 @Composable
-fun CommandNameDialog(
+fun RenameDialog(
     title: String,
     initialValue: String = "",
     confirmEnabled: Boolean = true,

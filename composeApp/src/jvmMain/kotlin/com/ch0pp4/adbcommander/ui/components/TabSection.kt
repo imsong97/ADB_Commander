@@ -58,12 +58,14 @@ fun TabSection(
     onItemSelected: (SavedCommandUiModel) -> Unit,
     onItemDeleted: (SavedCommandUiModel) -> Unit,
     onItemRenamed: (SavedCommandUiModel, String) -> Unit,
+    onRenameClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
 ) {
     TreeTabHeader(
         label = label,
         expanded = expanded,
         onClick = onHeaderClick,
+        onRenameClick = onRenameClick,
         onDeleteClick = onDeleteClick,
     )
     AnimatedVisibility(
@@ -91,6 +93,7 @@ fun TreeTabHeader(
     expanded: Boolean,
     onClick: () -> Unit,
     onAddClick: (() -> Unit)? = null,
+    onRenameClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
 ) {
     val rotation by animateFloatAsState(targetValue = if (expanded) 90f else 0f)
@@ -129,6 +132,19 @@ fun TreeTabHeader(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        if (onRenameClick != null) {
+            IconButton(
+                onClick = onRenameClick,
+                modifier = Modifier.size(28.dp).alpha(if (isHovered) 1f else 0f),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Edit,
                     contentDescription = null,
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -204,7 +220,7 @@ fun SavedItemRow(
     }
 
     if (showRenameDialog) {
-        CommandNameDialog(
+        RenameDialog(
             title = stringResource(Res.string.dialog_rename_title),
             initialValue = item.title,
             onConfirm = { name ->

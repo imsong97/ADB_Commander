@@ -37,4 +37,12 @@ class CollectionViewModel(private val repository: CommandRepository) : ViewModel
             loadCollections()
         }
     }
+
+    fun renameCollection(id: Int, newName: String) {
+        if (newName.isBlank()) return
+        viewModelScope.launch {
+            repository.renameCollection(id, newName)
+            loadCollections()
+        }
+    }
 }

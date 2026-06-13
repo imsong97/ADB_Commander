@@ -109,6 +109,14 @@ class LocalDataSourceImpl(
         }
     }
 
+    override suspend fun renameCollection(id: Int, name: String): Int = withContext(context = dispatcher) {
+        transaction {
+            val entity = CollectionEntity.findById(id) ?: return@transaction 0
+            entity.name = name
+            1
+        }
+    }
+
     override suspend fun deleteCollection(id: Int): Int = withContext(context = dispatcher) {
         transaction {
             CollectionSavedCommandEntity
