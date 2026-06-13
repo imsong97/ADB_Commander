@@ -2,16 +2,42 @@
 
 A desktop GUI tool that helps you write and execute ADB commands with a built-in save feature.
 
-## Skills
-MVVM + Repository pattern for managing saved commands in the SQLite database
+## Tech Stack
 
-| Layer     | Library                           |
-|-----------|-----------------------------------|
-| UI        | Compose Multiplatform (Material3) |
-| Async     | Kotlin Coroutines                 |
-| Database  | Jetbrains Exposed (SQLite)        |
-| Target    | JVM Desktop (macOS / Windows)     |
+| Layer    | Library                           |
+|----------|-----------------------------------|
+| UI       | Compose Multiplatform (Material3) |
+| Async    | Kotlin Coroutines                 |
+| Database | Jetbrains Exposed (SQLite)        |
+| Target   | JVM Desktop (macOS / Windows)     |
 
+## Architecture
+
+MVVM + Repository (Data Layer)
+
+<img width="1000" height="376" alt="Image" src="https://github.com/user-attachments/assets/73fbd95c-7ddb-4d5b-a0fd-c0730585c93a" />
+
+### Package
+
+```
+composeApp/
+    ├── main.kt                         
+    ├── presentation
+    ├── ui
+    ├── di
+    ├── executor # Run ADB command
+    └── preference
+
+shared/
+├── commonMain/data/
+│       ├── CommandRepository.kt # Repository Interface
+│       ├── CommandRepositoryImpl.kt   
+│       ├── datasource
+│       └── model
+└── desktopMain/local
+        ├── LocalDataSourceImpl.kt     
+        └── database
+```
 
 ## Features
 
@@ -24,6 +50,11 @@ MVVM + Repository pattern for managing saved commands in the SQLite database
 
 ### ADB Command Tab
 - Enter any ADB command and execute it directly
+
+### Collection
+- 커맨드를 컬렉션으로 묶어 관리 (생성 / 삭제 / 이름 변경)
+- 컬렉션 내 커맨드 저장 / 수정 / 삭제 / 이름 변경
+- View 메뉴에서 컬렉션 개별 표시 여부 토글
 
 ### Common
 - Save frequently used commands with a custom title
@@ -50,5 +81,6 @@ MVVM + Repository pattern for managing saved commands in the SQLite database
 # Windows (.exe)
 ./gradlew packageExe
 ```
+
 ## License
 [Apache License 2.0](LICENSE)
