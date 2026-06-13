@@ -68,8 +68,9 @@ class AdbViewModel(
         if (title.isBlank() || command.isBlank()) return
         viewModelScope.launch {
             try {
-                commandRepository.saveADBCommand(title = title, command = command)
+                val newId = commandRepository.saveADBCommand(title = title, command = command)
                 loadSavedItems()
+                _uiState.update { it.copy(selectedItemId = newId, selectedTitle = title, originalCommand = command, isModified = false) }
             } catch (e: Exception) {
                 e.printStackTrace()
                 _uiState.update { it.copy(executionResult = "[Save Error] ${e::class.simpleName}: ${e.message}") }

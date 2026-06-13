@@ -21,6 +21,9 @@ object DatabaseFactory {
             SchemaUtils.create(
                 SavedCommandTable,
                 SavedCommandExtraTable,
+                CollectionTable,
+                CollectionSavedCommandTable,
+                CollectionSavedCommandExtraTable,
             )
         }
 

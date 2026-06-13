@@ -58,7 +58,7 @@ fun CommandNameDialog(
             Column(modifier = Modifier.width(300.dp)) {
                 OutlinedTextField(
                     value = text,
-                    onValueChange = { text = it },
+                    onValueChange = { if (it.length <= 255) text = it },
                     label = { Text(stringResource(Res.string.dialog_name_label)) },
                     singleLine = true,
                 )

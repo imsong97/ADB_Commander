@@ -1,5 +1,10 @@
 package com.ch0pp4.adbcommander.local
 
+import com.ch0pp4.adbcommander.local.database.CollectionEntity
+import com.ch0pp4.adbcommander.local.database.CollectionSavedCommandEntity
+import com.ch0pp4.adbcommander.local.database.CollectionSavedCommandExtraEntity
+import com.ch0pp4.adbcommander.local.database.CollectionSavedCommandTable
+import com.ch0pp4.adbcommander.local.database.CollectionTable
 import com.ch0pp4.adbcommander.local.database.IntentType
 import com.ch0pp4.adbcommander.local.database.SavedCommandEntity
 import com.ch0pp4.adbcommander.local.database.SavedCommandExtraEntity
@@ -8,6 +13,8 @@ import com.ch0pp4.adbcommander.local.database.SourceTab
 import com.ch0pp4.adbcommander.local.database.toDataModel
 import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
 import com.ch0pp4.adbcommander.data.model.BroadcastExtra
+import com.ch0pp4.adbcommander.data.model.Collection
+import com.ch0pp4.adbcommander.data.model.CollectionSavedCommand
 import com.ch0pp4.adbcommander.data.model.IntentCommandType
 import com.ch0pp4.adbcommander.data.model.SavedCommand
 import kotlinx.coroutines.CoroutineDispatcher
@@ -80,6 +87,125 @@ class LocalDataSourceImpl(
         transaction {
             val entity = SavedCommandEntity.findById(id) ?: return@transaction 0
             entity.title = title
+            1
+        }
+    }
+
+    override suspend fun saveCollection(name: String): Int = withContext(context = dispatcher) {
+        transaction {
+            CollectionEntity.new {
+                this.name = name
+                this.createdAt = LocalDateTime.now()
+            }.id.value
+        }
+    }
+
+    override suspend fun getAllCollections(): List<Collection> = withContext(context = dispatcher) {
+        transaction {
+            CollectionEntity
+                .all()
+                .orderBy(CollectionTable.createdAt to SortOrder.DESC)
+                .map { it.toDataModel() }
+        }
+    }
+
+    override suspend fun deleteCollection(id: Int): Int = withContext(context = dispatcher) {
+        transaction {
+            CollectionSavedCommandEntity
+                .find { CollectionSavedCommandTable.collectionId eq id }
+                .forEach { cmd ->
+                    cmd.extras.forEach { it.delete() }
+                    cmd.delete()
+                }
+            CollectionEntity.findById(id)?.delete()
+            1
+        }
+    }
+
+    override suspend fun saveCollectionCommand(
+        collectionId: Int,
+        title: String,
+        command: String,
+        intentType: IntentCommandType?,
+        extras: List<BroadcastExtra>,
+    ): Int = withContext(context = dispatcher) {
+        transaction {
+            val entity = CollectionSavedCommandEntity.new {
+                this.collectionId = CollectionEntity[collectionId].id
+                this.title = title
+                this.command = command
+                this.intentType = when (intentType) {
+                    IntentCommandType.BROADCAST -> IntentType.BROADCAST
+                    IntentCommandType.START -> IntentType.START
+                    IntentCommandType.START_SERVICE -> IntentType.STARTSERVICE
+                    else -> IntentType.NONE
+                }
+                this.createdAt = LocalDateTime.now()
+            }
+            extras.forEach { extra ->
+                CollectionSavedCommandExtraEntity.new {
+                    this.savedCommand = entity
+                    this.extraType = extra.type.name
+                    this.extra = extra.extra
+                    this.value = extra.value
+                }
+            }
+            entity.id.value
+        }
+    }
+
+    override suspend fun getByCollection(collectionId: Int): List<CollectionSavedCommand> = withContext(context = dispatcher) {
+        transaction {
+            CollectionSavedCommandEntity
+                .find { CollectionSavedCommandTable.collectionId eq collectionId }
+                .orderBy(CollectionSavedCommandTable.createdAt to SortOrder.ASC)
+                .map { it.toDataModel() }
+        }
+    }
+
+    override suspend fun deleteCollectionCommand(id: Int): Int = withContext(context = dispatcher) {
+        transaction {
+            val entity = CollectionSavedCommandEntity.findById(id) ?: return@transaction 0
+            entity.extras.forEach { it.delete() }
+            entity.delete()
+            1
+        }
+    }
+
+    override suspend fun renameCollectionCommand(id: Int, title: String): Int = withContext(context = dispatcher) {
+        transaction {
+            val entity = CollectionSavedCommandEntity.findById(id) ?: return@transaction 0
+            entity.title = title
+            1
+        }
+    }
+
+    override suspend fun updateCollectionCommand(
+        id: Int,
+        title: String,
+        command: String,
+        intentType: IntentCommandType?,
+        extras: List<BroadcastExtra>,
+    ): Int = withContext(context = dispatcher) {
+        transaction {
+            val entity = CollectionSavedCommandEntity.findById(id) ?: return@transaction 0
+            entity.title = title
+            entity.command = command
+            entity.intentType = when (intentType) {
+                IntentCommandType.BROADCAST -> IntentType.BROADCAST
+                IntentCommandType.START -> IntentType.START
+                IntentCommandType.START_SERVICE -> IntentType.STARTSERVICE
+                else -> IntentType.NONE
+            }
+            entity.extras.forEach { it.delete() }
+            extras.forEach { extra ->
+                CollectionSavedCommandExtraEntity.new {
+                    this.savedCommand = entity
+                    this.extraType = extra.type.name
+                    this.extra = extra.extra
+                    this.value = extra.value
+                }
+            }
             1
         }
     }

@@ -18,15 +18,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SendBroadcastViewModel(
+class CollectionCommandViewModel(
     private val commandRepository: CommandRepository,
     private val executor: AdbExecutor,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SendBroadcastUiState())
+    private val _uiState = MutableStateFlow(SendBroadcastUiState(commandType = IntentCommandType.ADB))
     val uiState: StateFlow<SendBroadcastUiState> = _uiState.asStateFlow()
 
-    init {
+    private var currentCollectionId: Int? = null
+
+    fun setCollection(collectionId: Int) {
+        if (currentCollectionId == collectionId) return
+        currentCollectionId = collectionId
+        _uiState.update { SendBroadcastUiState(commandType = IntentCommandType.ADB) }
         loadSavedItems()
     }
 
@@ -64,17 +69,38 @@ class SendBroadcastViewModel(
         }
     }
 
+    fun saveCommand(title: String) {
+        val collectionId = currentCollectionId ?: return
+        val state = _uiState.value
+        if (title.isBlank()) return
+        viewModelScope.launch {
+            try {
+                val newId = commandRepository.saveCollectionCommand(
+                    collectionId = collectionId,
+                    title = title,
+                    command = state.completedCommand,
+                    intentType = state.commandType.toData(),
+                    extras = state.extras.map { it.toData() },
+                )
+                loadSavedItems()
+                _uiState.update { it.copy(selectedItemId = newId, selectedTitle = title, originalCompletedCommand = state.completedCommand, isModified = false) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun updateCommand(id: Int, title: String) {
         val state = _uiState.value
         viewModelScope.launch {
             try {
-                commandRepository.updateCommand(
+                commandRepository.updateCollectionCommand(
                     id = id,
                     title = title,
                     command = state.completedCommand,
                     intentType = state.commandType.toData(),
                     extras = state.extras.map { it.toData() },
-                ) // toData() returns null for ADB — CommandRepository accepts nullable intentType
+                )
                 loadSavedItems()
                 _uiState.update { it.copy(selectedTitle = title, originalCompletedCommand = state.completedCommand, isModified = false) }
             } catch (e: Exception) {
@@ -83,23 +109,46 @@ class SendBroadcastViewModel(
         }
     }
 
-    fun saveCommand(title: String) {
-        val state = _uiState.value
-        if (title.isBlank()) return
+    fun selectItem(item: SavedCommandUiModel) {
+        val (commandType, primaryValue) = if (item.intentType == IntentCommandType.ADB) {
+            IntentCommandType.ADB to item.command.removePrefix("adb ").trim()
+        } else {
+            val prefix = "adb shell ${item.intentType.adbCommand} ${item.intentType.actionFlag} "
+            item.intentType to item.command.removePrefix(prefix).substringBefore(" --").trim()
+        }
+        _uiState.update { state ->
+            val new = state.copy(
+                commandType = commandType,
+                primaryValue = primaryValue,
+                extras = item.extras,
+                executionResult = "",
+                selectedItemId = item.id,
+                selectedTitle = item.title,
+                originalCompletedCommand = item.command,
+                isModified = false,
+            )
+            new.copy(completedCommand = buildCommand(new))
+        }
+    }
+
+    fun deleteItem(item: SavedCommandUiModel) {
         viewModelScope.launch {
-            try {
-                val newId = commandRepository.saveBroadcastCommand(
-                    title = title,
-                    command = state.completedCommand,
-                    intentType = state.commandType.toData() ?: return@launch,
-                    extras = state.extras.map { it.toData() },
-                )
-                loadSavedItems()
-                _uiState.update { it.copy(selectedItemId = newId, selectedTitle = title, originalCompletedCommand = state.completedCommand, isModified = false) }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _uiState.update { it.copy(executionResult = "[Save Error] ${e::class.simpleName}: ${e.message}") }
+            commandRepository.deleteCollectionCommand(item.id)
+            if (_uiState.value.selectedItemId == item.id) {
+                onReset()
             }
+            loadSavedItems()
+        }
+    }
+
+    fun renameItem(item: SavedCommandUiModel, newTitle: String) {
+        if (newTitle.isBlank()) return
+        viewModelScope.launch {
+            commandRepository.renameCollectionCommand(item.id, newTitle)
+            if (_uiState.value.selectedItemId == item.id) {
+                _uiState.update { it.copy(selectedTitle = newTitle) }
+            }
+            loadSavedItems()
         }
     }
 
@@ -135,39 +184,6 @@ class SendBroadcastViewModel(
         }
     }
 
-    fun renameItem(item: SavedCommandUiModel, newTitle: String) {
-        if (newTitle.isBlank()) return
-        viewModelScope.launch {
-            commandRepository.renameCommand(item.id, newTitle)
-            loadSavedItems()
-        }
-    }
-
-    fun selectItem(item: SavedCommandUiModel) {
-        val prefix = "adb shell ${item.intentType.adbCommand} ${item.intentType.actionFlag} "
-        val primaryValue = item.command.removePrefix(prefix).substringBefore(" --").trim()
-        _uiState.update { state ->
-            val new = state.copy(
-                commandType = item.intentType,
-                primaryValue = primaryValue,
-                extras = item.extras,
-                executionResult = "",
-                selectedItemId = item.id,
-                selectedTitle = item.title,
-                originalCompletedCommand = item.command,
-                isModified = false,
-            )
-            new.copy(completedCommand = buildCommand(new))
-        }
-    }
-
-    fun deleteItem(item: SavedCommandUiModel) {
-        viewModelScope.launch {
-            commandRepository.deleteById(item.id)
-            loadSavedItems()
-        }
-    }
-
     fun onReset() {
         _uiState.update { state ->
             val new = state.copy(
@@ -184,25 +200,31 @@ class SendBroadcastViewModel(
     }
 
     fun clearSelection() {
-        _uiState.update { it.copy(selectedItemId = null) }
+        _uiState.update { it.copy(selectedItemId = null, selectedTitle = null, isModified = false) }
     }
 
     private fun loadSavedItems() {
+        val collectionId = currentCollectionId ?: return
         viewModelScope.launch {
-            val items = commandRepository.getByTab("BROADCAST").map { it.toPresentation() }
+            val items = commandRepository.getByCollection(collectionId).map { it.toPresentation() }
             _uiState.update { it.copy(savedItems = items) }
         }
     }
 
     private fun buildCommand(state: SendBroadcastUiState): String {
         if (state.primaryValue.isBlank()) return ""
-        val sb = StringBuilder("adb shell ${state.commandType.adbCommand} ${state.commandType.actionFlag} ${state.primaryValue}")
-        state.extras.forEach { extra ->
-            if (extra.extra.isNotBlank()) {
-                sb.append(" ${extra.type.flag} ${extra.extra} ${extra.value}")
+        return when (state.commandType) {
+            IntentCommandType.ADB -> "adb ${state.primaryValue}"
+            else -> {
+                val sb = StringBuilder("adb shell ${state.commandType.adbCommand} ${state.commandType.actionFlag} ${state.primaryValue}")
+                state.extras.forEach { extra ->
+                    if (extra.extra.isNotBlank()) {
+                        sb.append(" ${extra.type.flag} ${extra.extra} ${extra.value}")
+                    }
+                }
+                sb.toString()
             }
         }
-        return sb.toString()
     }
 
     override fun onCleared() {
