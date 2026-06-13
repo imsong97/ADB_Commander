@@ -32,8 +32,10 @@ fun LeftTabLayout(
     selectedCollection: UserCollectionUiModel?,
     visibleTabs: Set<MainTab>,
     hiddenCollectionIds: Set<Int>,
+    initialExpandedTabs: Set<MainTab>,
     onTabSelected: (MainTab) -> Unit,
     onCollectionSelected: (UserCollectionUiModel?) -> Unit,
+    onExpandedTabsChange: (Set<MainTab>) -> Unit,
     adbViewModel: AdbViewModel,
     broadcastViewModel: SendBroadcastViewModel,
     collectionViewModel: CollectionViewModel,
@@ -47,11 +49,17 @@ fun LeftTabLayout(
     val userCollections = allCollections.filter { it.id !in hiddenCollectionIds }
 
     var showSaveDialog by remember { mutableStateOf(false) }
-    var expandedTabs by remember { mutableStateOf(setOf(selectedTab)) }
+    var expandedTabs by remember { mutableStateOf(initialExpandedTabs) }
+
     var expandedCollections by remember { mutableStateOf(setOf<Int>()) }
     var showCreateCollectionDialog by remember { mutableStateOf(false) }
     var deleteTargetCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
     var renameTargetCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
+
+    LaunchedEffect(expandedTabs) {
+        // 탭 상태 저장
+        onExpandedTabsChange(expandedTabs)
+    }
 
     LaunchedEffect(selectedCollection) {
         // null(다른 탭으로 이동)이면 expandedCollections 그대로 유지

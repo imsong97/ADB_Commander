@@ -101,7 +101,7 @@ fun main() = application {
         )
 
         AdbCommanderTheme {
-            var leftPanelWidth by remember { mutableStateOf(220.dp) }
+            var leftPanelWidth by remember { mutableStateOf(appPreferences.getLeftPanelWidth().dp) }
             val density = LocalDensity.current
 
             Surface(modifier = Modifier.fillMaxSize()) {
@@ -121,6 +121,7 @@ fun main() = application {
                         selectedCollection = selectedCollection,
                         visibleTabs = visibleTabs,
                         hiddenCollectionIds = hiddenCollectionIds,
+                        initialExpandedTabs = remember { appPreferences.getExpandedTabs() },
                         onTabSelected = { tab ->
                             selectedTab = tab
                             selectedCollection = null
@@ -131,6 +132,7 @@ fun main() = application {
                                 collectionCommandViewModel.setCollection(collection.id)
                             }
                         },
+                        onExpandedTabsChange = { appPreferences.setExpandedTabs(it) },
                         adbViewModel = adbViewModel,
                         broadcastViewModel = broadcastViewModel,
                         collectionViewModel = collectionViewModel,
@@ -145,8 +147,9 @@ fun main() = application {
                             .draggable(
                                 orientation = Orientation.Horizontal,
                                 state = rememberDraggableState { delta ->
-                                    val newWidth = leftPanelWidth + with(density) { delta.toDp() }
-                                    leftPanelWidth = newWidth.coerceIn(150.dp, 400.dp)
+                                    val newWidth = (leftPanelWidth + with(density) { delta.toDp() }).coerceIn(150.dp, 400.dp)
+                                    leftPanelWidth = newWidth
+                                    appPreferences.setLeftPanelWidth(newWidth.value)
                                 }
                             ),
                     )
