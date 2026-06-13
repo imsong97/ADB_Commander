@@ -1,10 +1,6 @@
 package com.ch0pp4.adbcommander.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,38 +8,22 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import adbcommander.composeapp.generated.resources.*
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.unit.sp
 import com.ch0pp4.adbcommander.presentation.AdbViewModel
 import com.ch0pp4.adbcommander.presentation.CollectionCommandViewModel
 import com.ch0pp4.adbcommander.presentation.CollectionViewModel
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.MainTab
-import com.ch0pp4.adbcommander.presentation.model.SavedCommandUiModel
 import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
 import com.ch0pp4.adbcommander.ui.components.CommandNameDialog
 import com.ch0pp4.adbcommander.ui.components.CreateCollectionDialog
 import com.ch0pp4.adbcommander.ui.components.DeleteConfirmDialog
-import com.ch0pp4.adbcommander.ui.components.DeleteIconButton
-import com.ch0pp4.adbcommander.ui.theme.LightSidebarSelected
+import com.ch0pp4.adbcommander.ui.components.TabSection
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -71,11 +51,11 @@ fun LeftTabLayout(
     var deleteTargetCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
 
     LaunchedEffect(selectedCollection) {
+        // null(다른 탭으로 이동)이면 expandedCollections 그대로 유지
         val newId = selectedCollection?.id
         if (newId != null) {
             expandedCollections = setOf(newId)
         }
-        // null(다른 탭으로 이동)이면 expandedCollections 그대로 유지
     }
 
     val saveEnabled = when {
@@ -138,10 +118,12 @@ fun LeftTabLayout(
                 items = userCollections,
                 key = { it.id },
             ) { collection ->
-                TreeTabHeader(
+                TabSection(
                     label = collection.name,
                     expanded = expandedCollections.contains(collection.id),
-                    onClick = {
+                    items = collectionCommandState.savedItems,
+                    selectedItemId = collectionCommandState.selectedItemId,
+                    onHeaderClick = {
                         if (selectedCollection?.id == collection.id) {
                             expandedCollections = if (expandedCollections.contains(collection.id))
                                 expandedCollections - collection.id
@@ -155,38 +137,26 @@ fun LeftTabLayout(
                             expandedCollections = expandedCollections + collection.id
                         }
                     },
+                    onItemSelected = { item ->
+                        collectionCommandViewModel.selectItem(item)
+                        broadcastViewModel.clearSelection()
+                        adbViewModel.clearSelection()
+                        onCollectionSelected(collection)
+                    },
+                    onItemDeleted = { collectionCommandViewModel.deleteItem(it) },
+                    onItemRenamed = { item, title -> collectionCommandViewModel.renameItem(item, title) },
                     onDeleteClick = { deleteTargetCollection = collection },
                 )
-                AnimatedVisibility(
-                    visible = expandedCollections.contains(collection.id),
-                    enter = expandVertically(),
-                    exit = shrinkVertically(),
-                ) {
-                    Column {
-                        collectionCommandState.savedItems.forEach { item ->
-                            SavedItemRow(
-                                item = item,
-                                isSelected = item.id == collectionCommandState.selectedItemId,
-                                onSelected = {
-                                    collectionCommandViewModel.selectItem(item)
-                                    broadcastViewModel.clearSelection()
-                                    adbViewModel.clearSelection()
-                                    onCollectionSelected(collection)
-                                },
-                                onDeleted = { collectionCommandViewModel.deleteItem(item) },
-                                onRenamed = { collectionCommandViewModel.renameItem(item, it) },
-                            )
-                        }
-                    }
-                }
             }
 
             if (MainTab.SEND_BROADCAST in visibleTabs) {
-                item(key = "header_broadcast") {
-                    TreeTabHeader(
+                item(key = "broadcast") {
+                    TabSection(
                         label = stringResource(Res.string.tab_send_broadcast),
                         expanded = expandedTabs.contains(MainTab.SEND_BROADCAST),
-                        onClick = {
+                        items = broadcastState.savedItems,
+                        selectedItemId = broadcastState.selectedItemId,
+                        onHeaderClick = {
                             if (selectedTab == MainTab.SEND_BROADCAST && selectedCollection == null) {
                                 expandedTabs = if (expandedTabs.contains(MainTab.SEND_BROADCAST))
                                     expandedTabs - MainTab.SEND_BROADCAST
@@ -200,40 +170,26 @@ fun LeftTabLayout(
                                 expandedTabs = expandedTabs + MainTab.SEND_BROADCAST
                             }
                         },
+                        onItemSelected = { item ->
+                            broadcastViewModel.selectItem(item)
+                            adbViewModel.clearSelection()
+                            collectionCommandViewModel.clearSelection()
+                            onTabSelected(MainTab.SEND_BROADCAST)
+                        },
+                        onItemDeleted = { broadcastViewModel.deleteItem(it) },
+                        onItemRenamed = { item, title -> broadcastViewModel.renameItem(item, title) },
                     )
-                }
-                item(key = "items_broadcast") {
-                    AnimatedVisibility(
-                        visible = expandedTabs.contains(MainTab.SEND_BROADCAST),
-                        enter = expandVertically(),
-                        exit = shrinkVertically(),
-                    ) {
-                        Column {
-                            broadcastState.savedItems.forEach { item ->
-                                SavedItemRow(
-                                    item = item,
-                                    isSelected = item.id == broadcastState.selectedItemId,
-                                    onSelected = {
-                                        broadcastViewModel.selectItem(item)
-                                        adbViewModel.clearSelection()
-                                        collectionCommandViewModel.clearSelection()
-                                        onTabSelected(MainTab.SEND_BROADCAST)
-                                    },
-                                    onDeleted = { broadcastViewModel.deleteItem(item) },
-                                    onRenamed = { broadcastViewModel.renameItem(item, it) },
-                                )
-                            }
-                        }
-                    }
                 }
             }
 
             if (MainTab.COMMAND_LIST in visibleTabs) {
-                item(key = "header_command") {
-                    TreeTabHeader(
+                item(key = "command") {
+                    TabSection(
                         label = stringResource(Res.string.tab_command),
                         expanded = expandedTabs.contains(MainTab.COMMAND_LIST),
-                        onClick = {
+                        items = adbState.savedItems,
+                        selectedItemId = adbState.selectedItemId,
+                        onHeaderClick = {
                             if (selectedTab == MainTab.COMMAND_LIST && selectedCollection == null) {
                                 expandedTabs = if (expandedTabs.contains(MainTab.COMMAND_LIST))
                                     expandedTabs - MainTab.COMMAND_LIST
@@ -247,31 +203,15 @@ fun LeftTabLayout(
                                 expandedTabs = expandedTabs + MainTab.COMMAND_LIST
                             }
                         },
+                        onItemSelected = { item ->
+                            adbViewModel.selectItem(item)
+                            broadcastViewModel.clearSelection()
+                            collectionCommandViewModel.clearSelection()
+                            onTabSelected(MainTab.COMMAND_LIST)
+                        },
+                        onItemDeleted = { adbViewModel.deleteItem(it) },
+                        onItemRenamed = { item, title -> adbViewModel.renameItem(item, title) },
                     )
-                }
-                item(key = "items_command") {
-                    AnimatedVisibility(
-                        visible = expandedTabs.contains(MainTab.COMMAND_LIST),
-                        enter = expandVertically(),
-                        exit = shrinkVertically(),
-                    ) {
-                        Column {
-                            adbState.savedItems.forEach { item ->
-                                SavedItemRow(
-                                    item = item,
-                                    isSelected = item.id == adbState.selectedItemId,
-                                    onSelected = {
-                                        adbViewModel.selectItem(item)
-                                        broadcastViewModel.clearSelection()
-                                        collectionCommandViewModel.clearSelection()
-                                        onTabSelected(MainTab.COMMAND_LIST)
-                                    },
-                                    onDeleted = { adbViewModel.deleteItem(item) },
-                                    onRenamed = { adbViewModel.renameItem(item, it) },
-                                )
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -352,153 +292,6 @@ fun LeftTabLayout(
                 showSaveDialog = false
             },
             onDismiss = { showSaveDialog = false },
-        )
-    }
-}
-
-@Composable
-private fun TreeTabHeader(
-    label: String,
-    expanded: Boolean,
-    onClick: () -> Unit,
-    onAddClick: (() -> Unit)? = null,
-    onDeleteClick: (() -> Unit)? = null,
-) {
-    val rotation by animateFloatAsState(targetValue = if (expanded) 90f else 0f)
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
-            .hoverable(interactionSource)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Icon(
-            imageVector = Icons.Filled.ChevronRight,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp).graphicsLayer { rotationZ = rotation },
-            tint = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        if (onAddClick != null) {
-            IconButton(
-                onClick = onAddClick,
-                modifier = Modifier.size(28.dp).alpha(if (isHovered) 1f else 0f),
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-        if (onDeleteClick != null) {
-            IconButton(
-                onClick = onDeleteClick,
-                modifier = Modifier.size(28.dp).alpha(if (isHovered) 1f else 0f),
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Delete,
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SavedItemRow(
-    item: SavedCommandUiModel,
-    isSelected: Boolean,
-    onSelected: () -> Unit,
-    onDeleted: () -> Unit,
-    onRenamed: (String) -> Unit,
-) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var showRenameDialog by remember { mutableStateOf(false) }
-    var renameText by remember { mutableStateOf("") }
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = 2.dp)
-            .background(
-                color = if (isSelected) LightSidebarSelected else Color.Transparent,
-                shape = RoundedCornerShape(8.dp),
-            )
-            .clip(RoundedCornerShape(8.dp))
-            .hoverable(interactionSource = interactionSource)
-            .clickable(onClick = onSelected)
-            .padding(start = 18.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = item.title,
-            modifier = Modifier.weight(1f).padding(top = 6.dp, bottom = 6.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        IconButton(
-            onClick = {
-                renameText = item.title
-                showRenameDialog = true
-            },
-            modifier = Modifier.size(28.dp).alpha(if (isHovered) 1f else 0f),
-        ) {
-            Icon(
-                Icons.Outlined.Edit,
-                contentDescription = stringResource(Res.string.edit_command_title),
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        DeleteIconButton(
-            onClick = { showDeleteDialog = true },
-            modifier = Modifier.size(28.dp).alpha(if (isHovered) 1f else 0f),
-        )
-    }
-
-    if (showRenameDialog) {
-        CommandNameDialog(
-            title = stringResource(Res.string.dialog_rename_title),
-            initialValue = item.title,
-            onConfirm = { name ->
-                onRenamed(name)
-                showRenameDialog = false
-            },
-            onDismiss = { showRenameDialog = false },
-        )
-    }
-
-    if (showDeleteDialog) {
-        DeleteConfirmDialog(
-            title = stringResource(Res.string.dialog_delete_title),
-            message = "\"${item.title}\"\n${stringResource(Res.string.dialog_delete_message)}",
-            onConfirm = {
-                onDeleted()
-                showDeleteDialog = false
-            },
-            onDismiss = { showDeleteDialog = false },
         )
     }
 }
