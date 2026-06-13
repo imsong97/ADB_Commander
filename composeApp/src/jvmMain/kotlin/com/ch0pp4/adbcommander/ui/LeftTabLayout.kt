@@ -31,6 +31,7 @@ fun LeftTabLayout(
     selectedTab: MainTab,
     selectedCollection: UserCollectionUiModel?,
     visibleTabs: Set<MainTab>,
+    hiddenCollectionIds: Set<Int>,
     onTabSelected: (MainTab) -> Unit,
     onCollectionSelected: (UserCollectionUiModel?) -> Unit,
     adbViewModel: AdbViewModel,
@@ -42,7 +43,8 @@ fun LeftTabLayout(
     val broadcastState by broadcastViewModel.uiState.collectAsState()
     val adbState by adbViewModel.uiState.collectAsState()
     val collectionCommandState by collectionCommandViewModel.uiState.collectAsState()
-    val userCollections by collectionViewModel.collections.collectAsState()
+    val allCollections by collectionViewModel.collections.collectAsState()
+    val userCollections = allCollections.filter { it.id !in hiddenCollectionIds }
 
     var showSaveDialog by remember { mutableStateOf(false) }
     var expandedTabs by remember { mutableStateOf(setOf(selectedTab)) }

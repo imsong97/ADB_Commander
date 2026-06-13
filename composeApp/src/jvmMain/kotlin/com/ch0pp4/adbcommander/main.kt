@@ -66,9 +66,13 @@ fun main() = application {
         var selectedTab by remember { mutableStateOf(MainTab.SEND_BROADCAST) }
         var selectedCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
         var visibleTabs by remember { mutableStateOf(appPreferences.getVisibleTabs()) }
+        val userCollections by collectionViewModel.collections.collectAsState()
+        var hiddenCollectionIds by remember { mutableStateOf(setOf<Int>()) }
 
         AppMenuBar(
             visibleTabs = visibleTabs,
+            userCollections = userCollections,
+            hiddenCollectionIds = hiddenCollectionIds,
             onTabVisibilityChange = { tab, checked ->
                 val newVisible = if (checked) visibleTabs + tab else visibleTabs - tab
                 visibleTabs = newVisible
@@ -81,6 +85,13 @@ fun main() = application {
                         }
                         selectedTab = newTab
                     }
+                }
+            },
+            onCollectionVisibilityChange = { id, visible ->
+                hiddenCollectionIds = if (visible) hiddenCollectionIds - id else hiddenCollectionIds + id
+                if (!visible && selectedCollection?.id == id) {
+                    selectedCollection = null
+                    collectionCommandViewModel.onReset()
                 }
             },
         )
@@ -105,6 +116,7 @@ fun main() = application {
                         selectedTab = selectedTab,
                         selectedCollection = selectedCollection,
                         visibleTabs = visibleTabs,
+                        hiddenCollectionIds = hiddenCollectionIds,
                         onTabSelected = { tab ->
                             selectedTab = tab
                             selectedCollection = null
