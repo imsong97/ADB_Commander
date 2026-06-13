@@ -15,7 +15,7 @@ A desktop GUI tool that helps you write and execute ADB commands with a built-in
 
 MVVM + Repository (Data Layer)
 
-<img width="1000" height="376" alt="Image" src="https://github.com/user-attachments/assets/73fbd95c-7ddb-4d5b-a0fd-c0730585c93a" />
+<img width="1000" height="367" alt="Image" src="https://github.com/user-attachments/assets/503b7b53-8c7e-487d-8c53-2017533c873f" />
 
 ### Package
 
