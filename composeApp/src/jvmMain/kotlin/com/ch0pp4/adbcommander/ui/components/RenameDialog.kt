@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.AlertDialog
@@ -13,13 +14,18 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import adbcommander.composeapp.generated.resources.Res
@@ -28,7 +34,6 @@ import adbcommander.composeapp.generated.resources.btn_save
 import adbcommander.composeapp.generated.resources.dialog_name_label
 import adbcommander.composeapp.generated.resources.save_option_new
 import adbcommander.composeapp.generated.resources.save_option_update
-import androidx.compose.foundation.layout.padding
 import org.jetbrains.compose.resources.stringResource
 
 private enum class SaveOption { UPDATE, NEW }
@@ -44,8 +49,15 @@ fun RenameDialog(
     onConfirmUpdate: (String) -> Unit = {},
     onDismiss: () -> Unit,
 ) {
-    var text by remember { mutableStateOf(initialValue) }
+    var text by remember {
+        mutableStateOf(TextFieldValue(initialValue, selection = TextRange(initialValue.length)))
+    }
     var saveOption by remember { mutableStateOf(SaveOption.UPDATE) }
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     AlertDialog(
         onDismissRequest = { },
@@ -58,9 +70,10 @@ fun RenameDialog(
             Column(modifier = Modifier.width(300.dp)) {
                 OutlinedTextField(
                     value = text,
-                    onValueChange = { if (it.length <= 255) text = it },
+                    onValueChange = { if (it.text.length <= 255) text = it },
                     label = { Text(stringResource(Res.string.dialog_name_label)) },
                     singleLine = true,
+                    modifier = Modifier.focusRequester(focusRequester),
                 )
                 if (showUpdateOption) {
                     Spacer(Modifier.height(16.dp))
@@ -80,12 +93,12 @@ fun RenameDialog(
         },
         confirmButton = {
             TextButton(
-                enabled = text.isNotBlank() && confirmEnabled,
+                enabled = text.text.isNotBlank() && confirmEnabled,
                 onClick = {
                     if (showUpdateOption && saveOption == SaveOption.UPDATE) {
-                        onConfirmUpdate(text)
+                        onConfirmUpdate(text.text)
                     } else {
-                        onConfirm(text)
+                        onConfirm(text.text)
                     }
                 },
             ) { Text(stringResource(Res.string.btn_save)) }

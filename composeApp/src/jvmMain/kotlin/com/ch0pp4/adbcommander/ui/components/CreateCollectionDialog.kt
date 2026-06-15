@@ -7,11 +7,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.btn_cancel
@@ -26,6 +29,11 @@ fun CreateCollectionDialog(
     onDismiss: () -> Unit,
 ) {
     var text by remember { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     AlertDialog(
         onDismissRequest = { },
@@ -38,7 +46,7 @@ fun CreateCollectionDialog(
                 value = text,
                 onValueChange = { if (it.length <= 50) text = it },
                 label = { Text(stringResource(Res.string.dialog_name_label)) },
-                modifier = Modifier.width(300.dp),
+                modifier = Modifier.width(300.dp).focusRequester(focusRequester),
                 singleLine = true,
                 supportingText = { Text("${text.length}/50") },
             )
