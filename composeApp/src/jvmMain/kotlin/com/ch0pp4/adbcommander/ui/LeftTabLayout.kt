@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,9 +34,12 @@ fun LeftTabLayout(
     visibleTabs: Set<MainTab>,
     hiddenCollectionIds: Set<Int>,
     initialExpandedTabs: Set<MainTab>,
+    initialExpandedCollections: Set<Int>,
     onTabSelected: (MainTab) -> Unit,
     onCollectionSelected: (UserCollectionUiModel?) -> Unit,
     onExpandedTabsChange: (Set<MainTab>) -> Unit,
+    onExpandedCollectionsChange: (Set<Int>) -> Unit,
+    onCollectionDeleted: (Int) -> Unit,
     adbViewModel: AdbViewModel,
     broadcastViewModel: SendBroadcastViewModel,
     collectionViewModel: CollectionViewModel,
@@ -53,14 +57,17 @@ fun LeftTabLayout(
     var expandedTabs by remember { mutableStateOf(initialExpandedTabs) }
 
     // 컬렉션 개별 토글
-    var expandedCollections by remember { mutableStateOf(setOf<Int>()) }
+    var expandedCollections by remember { mutableStateOf(initialExpandedCollections) }
     var showCreateCollectionDialog by remember { mutableStateOf(false) }
     var deleteTargetCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
     var renameTargetCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
 
     LaunchedEffect(expandedTabs) {
-        // 탭 상태 저장
         onExpandedTabsChange(expandedTabs)
+    }
+
+    LaunchedEffect(expandedCollections) {
+        onExpandedCollectionsChange(expandedCollections)
     }
 
     val saveEnabled = when {
@@ -118,7 +125,11 @@ fun LeftTabLayout(
         }
         HorizontalDivider()
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        val listState = rememberLazyListState()
+        LaunchedEffect(Unit) {
+            listState.scrollToItem(0)
+        }
+        LazyColumn(state = listState, modifier = Modifier.weight(1f)) {
             items(
                 items = userCollections,
                 key = { it.id },
@@ -269,6 +280,7 @@ fun LeftTabLayout(
                 }
                 expandedCollections = expandedCollections - target.id
                 collectionCommandViewModel.removeCollectionItems(target.id)
+                onCollectionDeleted(target.id)
                 deleteTargetCollection = null
             },
             onDismiss = { deleteTargetCollection = null },

@@ -43,4 +43,17 @@ class AppPreferences {
     fun getLeftPanelWidth(): Float = prefs.getFloat(TAB_WIDTH, 220f)
 
     fun setLeftPanelWidth(width: Float) = prefs.putFloat(TAB_WIDTH, width)
+
+    fun getExpandedCollectionIds(): Set<Int> {
+        val raw = prefs.get("collection_expanded_ids", "")
+        return raw.split(",").mapNotNull { it.toIntOrNull() }.toSet()
+    }
+
+    fun setExpandedCollectionIds(ids: Set<Int>) {
+        prefs.put("collection_expanded_ids", ids.joinToString(","))
+    }
+
+    fun removeExpandedCollectionId(id: Int) {
+        setExpandedCollectionIds(getExpandedCollectionIds() - id)
+    }
 }

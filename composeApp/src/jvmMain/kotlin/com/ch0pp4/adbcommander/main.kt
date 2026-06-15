@@ -122,6 +122,7 @@ fun main() = application {
                         visibleTabs = visibleTabs,
                         hiddenCollectionIds = hiddenCollectionIds,
                         initialExpandedTabs = remember { appPreferences.getExpandedTabs() },
+                        initialExpandedCollections = remember { appPreferences.getExpandedCollectionIds() },
                         onTabSelected = { tab ->
                             selectedTab = tab
                             selectedCollection = null
@@ -133,6 +134,8 @@ fun main() = application {
                             }
                         },
                         onExpandedTabsChange = { appPreferences.setExpandedTabs(it) },
+                        onExpandedCollectionsChange = { appPreferences.setExpandedCollectionIds(it) },
+                        onCollectionDeleted = { appPreferences.removeExpandedCollectionId(it) },
                         adbViewModel = adbViewModel,
                         broadcastViewModel = broadcastViewModel,
                         collectionViewModel = collectionViewModel,
