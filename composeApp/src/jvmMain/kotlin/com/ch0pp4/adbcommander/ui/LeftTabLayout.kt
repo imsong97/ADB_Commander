@@ -45,12 +45,14 @@ fun LeftTabLayout(
     val broadcastState by broadcastViewModel.uiState.collectAsState()
     val adbState by adbViewModel.uiState.collectAsState()
     val collectionCommandState by collectionCommandViewModel.uiState.collectAsState()
+    val collectionItems by collectionCommandViewModel.collectionItems.collectAsState()
     val allCollections by collectionViewModel.collections.collectAsState()
     val userCollections = allCollections.filter { it.id !in hiddenCollectionIds }
 
     var showSaveDialog by remember { mutableStateOf(false) }
     var expandedTabs by remember { mutableStateOf(initialExpandedTabs) }
 
+    // 컬렉션 개별 토글
     var expandedCollections by remember { mutableStateOf(setOf<Int>()) }
     var showCreateCollectionDialog by remember { mutableStateOf(false) }
     var deleteTargetCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
@@ -59,14 +61,6 @@ fun LeftTabLayout(
     LaunchedEffect(expandedTabs) {
         // 탭 상태 저장
         onExpandedTabsChange(expandedTabs)
-    }
-
-    LaunchedEffect(selectedCollection) {
-        // null(다른 탭으로 이동)이면 expandedCollections 그대로 유지
-        val newId = selectedCollection?.id
-        if (newId != null) {
-            expandedCollections = setOf(newId)
-        }
     }
 
     val saveEnabled = when {
@@ -132,27 +126,28 @@ fun LeftTabLayout(
                 TabSection(
                     label = collection.name,
                     expanded = expandedCollections.contains(collection.id),
-                    items = collectionCommandState.savedItems,
-                    selectedItemId = collectionCommandState.selectedItemId,
+                    items = collectionItems[collection.id] ?: emptyList(),
+                    selectedItemId = if (selectedCollection?.id == collection.id) collectionCommandState.selectedItemId else null,
                     onHeaderClick = {
-                        if (selectedCollection?.id == collection.id) {
-                            expandedCollections = if (expandedCollections.contains(collection.id))
-                                expandedCollections - collection.id
-                            else
-                                expandedCollections + collection.id
+                        if (expandedCollections.contains(collection.id)) {
+                            expandedCollections = expandedCollections - collection.id
                         } else {
-                            broadcastViewModel.clearSelection()
-                            adbViewModel.clearSelection()
-                            collectionCommandViewModel.onReset()
-                            onCollectionSelected(collection)
                             expandedCollections = expandedCollections + collection.id
+                            if (selectedCollection?.id != collection.id) {
+                                broadcastViewModel.clearSelection()
+                                adbViewModel.clearSelection()
+                                collectionCommandViewModel.onReset()
+                                onCollectionSelected(collection)
+                            } else {
+                                collectionCommandViewModel.loadCollectionItems(collection.id)
+                            }
                         }
                     },
                     onItemSelected = { item ->
+                        onCollectionSelected(collection)
                         collectionCommandViewModel.selectItem(item)
                         broadcastViewModel.clearSelection()
                         adbViewModel.clearSelection()
-                        onCollectionSelected(collection)
                     },
                     onItemDeleted = { collectionCommandViewModel.deleteItem(it) },
                     onItemRenamed = { item, title -> collectionCommandViewModel.renameItem(item, title) },
@@ -273,6 +268,7 @@ fun LeftTabLayout(
                     onCollectionSelected(null)
                 }
                 expandedCollections = expandedCollections - target.id
+                collectionCommandViewModel.removeCollectionItems(target.id)
                 deleteTargetCollection = null
             },
             onDismiss = { deleteTargetCollection = null },

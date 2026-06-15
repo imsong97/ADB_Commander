@@ -26,6 +26,9 @@ class CollectionCommandViewModel(
     private val _uiState = MutableStateFlow(SendBroadcastUiState(commandType = IntentCommandType.ADB))
     val uiState: StateFlow<SendBroadcastUiState> = _uiState.asStateFlow()
 
+    private val _collectionItems = MutableStateFlow<Map<Int, List<SavedCommandUiModel>>>(emptyMap())
+    val collectionItems: StateFlow<Map<Int, List<SavedCommandUiModel>>> = _collectionItems.asStateFlow()
+
     private var currentCollectionId: Int? = null
 
     fun setCollection(collectionId: Int) {
@@ -33,6 +36,17 @@ class CollectionCommandViewModel(
         currentCollectionId = collectionId
         _uiState.update { SendBroadcastUiState(commandType = IntentCommandType.ADB) }
         loadSavedItems()
+    }
+
+    fun loadCollectionItems(collectionId: Int) {
+        viewModelScope.launch {
+            val items = commandRepository.getByCollection(collectionId).map { it.toPresentation() }
+            _collectionItems.update { it + (collectionId to items) }
+        }
+    }
+
+    fun removeCollectionItems(collectionId: Int) {
+        _collectionItems.update { it - collectionId }
     }
 
     fun onCommandTypeChange(type: IntentCommandType) {
@@ -208,6 +222,7 @@ class CollectionCommandViewModel(
         viewModelScope.launch {
             val items = commandRepository.getByCollection(collectionId).map { it.toPresentation() }
             _uiState.update { it.copy(savedItems = items) }
+            _collectionItems.update { it + (collectionId to items) }
         }
     }
 
