@@ -70,6 +70,12 @@ fun LeftTabLayout(
         onExpandedCollectionsChange(expandedCollections)
     }
 
+    LaunchedEffect(userCollections) {
+        userCollections
+            .filter { it.id in expandedCollections && collectionItems[it.id] == null }
+            .forEach { collectionCommandViewModel.loadCollectionItems(it.id) }
+    }
+
     val saveEnabled = when {
         selectedCollection != null -> collectionCommandState.completedCommand.isNotBlank() &&
             (collectionCommandState.selectedItemId == null || collectionCommandState.isModified)

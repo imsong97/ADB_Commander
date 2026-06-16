@@ -56,4 +56,17 @@ class AppPreferences {
     fun removeExpandedCollectionId(id: Int) {
         setExpandedCollectionIds(getExpandedCollectionIds() - id)
     }
+
+    fun getHiddenCollectionIds(): Set<Int> {
+        val raw = prefs.get("collection_hidden_ids", "")
+        return raw.split(",").mapNotNull { it.toIntOrNull() }.toSet()
+    }
+
+    fun setHiddenCollectionIds(ids: Set<Int>) {
+        prefs.put("collection_hidden_ids", ids.joinToString(","))
+    }
+
+    fun removeHiddenCollectionId(id: Int) {
+        setHiddenCollectionIds(getHiddenCollectionIds() - id)
+    }
 }

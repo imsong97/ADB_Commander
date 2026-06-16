@@ -67,7 +67,7 @@ fun main() = application {
         var selectedCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
         var visibleTabs by remember { mutableStateOf(appPreferences.getVisibleTabs()) }
         val userCollections by collectionViewModel.collections.collectAsState()
-        var hiddenCollectionIds by remember { mutableStateOf(setOf<Int>()) }
+        var hiddenCollectionIds by remember { mutableStateOf(appPreferences.getHiddenCollectionIds()) }
 
         LaunchedEffect(userCollections) {
             selectedCollection = userCollections.find { it.id == selectedCollection?.id }
@@ -92,7 +92,9 @@ fun main() = application {
                 }
             },
             onCollectionVisibilityChange = { id, visible ->
-                hiddenCollectionIds = if (visible) hiddenCollectionIds - id else hiddenCollectionIds + id
+                val newHidden = if (visible) hiddenCollectionIds - id else hiddenCollectionIds + id
+                hiddenCollectionIds = newHidden
+                appPreferences.setHiddenCollectionIds(newHidden)
                 if (!visible && selectedCollection?.id == id) {
                     selectedCollection = null
                     collectionCommandViewModel.onReset()
@@ -135,7 +137,11 @@ fun main() = application {
                         },
                         onExpandedTabsChange = { appPreferences.setExpandedTabs(it) },
                         onExpandedCollectionsChange = { appPreferences.setExpandedCollectionIds(it) },
-                        onCollectionDeleted = { appPreferences.removeExpandedCollectionId(it) },
+                        onCollectionDeleted = { id ->
+                            appPreferences.removeExpandedCollectionId(id)
+                            appPreferences.removeHiddenCollectionId(id)
+                            hiddenCollectionIds = hiddenCollectionIds - id
+                        },
                         adbViewModel = adbViewModel,
                         broadcastViewModel = broadcastViewModel,
                         collectionViewModel = collectionViewModel,
