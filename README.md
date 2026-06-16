@@ -52,9 +52,9 @@ shared/
 - Enter any ADB command and execute it directly
 
 ### Collection
-- 커맨드를 컬렉션으로 묶어 관리 (생성 / 삭제 / 이름 변경)
-- 컬렉션 내 커맨드 저장 / 수정 / 삭제 / 이름 변경
-- View 메뉴에서 컬렉션 개별 표시 여부 토글
+- Organize commands into collections (create / delete / rename)
+- Save / edit / delete / rename commands within a collection
+- Toggle individual collection visibility from the View menu
 
 ### Common
 - Save frequently used commands with a custom title
