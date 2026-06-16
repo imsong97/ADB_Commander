@@ -29,10 +29,14 @@ import com.ch0pp4.adbcommander.local.database.DatabaseFactory
 import com.ch0pp4.adbcommander.di.AppContainer
 import com.ch0pp4.adbcommander.preference.AppPreferences
 import com.ch0pp4.adbcommander.presentation.AdbViewModel
+import com.ch0pp4.adbcommander.presentation.CollectionCommandViewModel
+import com.ch0pp4.adbcommander.presentation.CollectionViewModel
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import com.ch0pp4.adbcommander.presentation.model.MainTab
+import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
 import com.ch0pp4.adbcommander.ui.AdbCommandLayout
 import com.ch0pp4.adbcommander.ui.AppMenuBar
+import com.ch0pp4.adbcommander.ui.CollectionCommandLayout
 import com.ch0pp4.adbcommander.ui.LeftTabLayout
 import com.ch0pp4.adbcommander.ui.SendBroadcastCommandLayout
 import com.ch0pp4.adbcommander.ui.theme.AdbCommanderTheme
@@ -57,11 +61,22 @@ fun main() = application {
     ) {
         val adbViewModel: AdbViewModel = viewModel { appContainer.adbViewModel }
         val broadcastViewModel: SendBroadcastViewModel = viewModel { appContainer.sendBroadcastViewModel }
+        val collectionViewModel: CollectionViewModel = viewModel { appContainer.collectionViewModel }
+        val collectionCommandViewModel: CollectionCommandViewModel = viewModel { appContainer.collectionCommandViewModel }
         var selectedTab by remember { mutableStateOf(MainTab.SEND_BROADCAST) }
+        var selectedCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
         var visibleTabs by remember { mutableStateOf(appPreferences.getVisibleTabs()) }
+        val userCollections by collectionViewModel.collections.collectAsState()
+        var hiddenCollectionIds by remember { mutableStateOf(appPreferences.getHiddenCollectionIds()) }
+
+        LaunchedEffect(userCollections) {
+            selectedCollection = userCollections.find { it.id == selectedCollection?.id }
+        }
 
         AppMenuBar(
             visibleTabs = visibleTabs,
+            userCollections = userCollections,
+            hiddenCollectionIds = hiddenCollectionIds,
             onTabVisibilityChange = { tab, checked ->
                 val newVisible = if (checked) visibleTabs + tab else visibleTabs - tab
                 visibleTabs = newVisible
@@ -76,10 +91,19 @@ fun main() = application {
                     }
                 }
             },
+            onCollectionVisibilityChange = { id, visible ->
+                val newHidden = if (visible) hiddenCollectionIds - id else hiddenCollectionIds + id
+                hiddenCollectionIds = newHidden
+                appPreferences.setHiddenCollectionIds(newHidden)
+                if (!visible && selectedCollection?.id == id) {
+                    selectedCollection = null
+                    collectionCommandViewModel.onReset()
+                }
+            },
         )
 
         AdbCommanderTheme {
-            var leftPanelWidth by remember { mutableStateOf(220.dp) }
+            var leftPanelWidth by remember { mutableStateOf(appPreferences.getLeftPanelWidth().dp) }
             val density = LocalDensity.current
 
             Surface(modifier = Modifier.fillMaxSize()) {
@@ -96,10 +120,32 @@ fun main() = application {
                                 shape = RoundedCornerShape(12.dp),
                             ),
                         selectedTab = selectedTab,
+                        selectedCollection = selectedCollection,
                         visibleTabs = visibleTabs,
-                        onTabSelected = { selectedTab = it },
+                        hiddenCollectionIds = hiddenCollectionIds,
+                        initialExpandedTabs = remember { appPreferences.getExpandedTabs() },
+                        initialExpandedCollections = remember { appPreferences.getExpandedCollectionIds() },
+                        onTabSelected = { tab ->
+                            selectedTab = tab
+                            selectedCollection = null
+                        },
+                        onCollectionSelected = { collection ->
+                            selectedCollection = collection
+                            if (collection != null) {
+                                collectionCommandViewModel.setCollection(collection.id)
+                            }
+                        },
+                        onExpandedTabsChange = { appPreferences.setExpandedTabs(it) },
+                        onExpandedCollectionsChange = { appPreferences.setExpandedCollectionIds(it) },
+                        onCollectionDeleted = { id ->
+                            appPreferences.removeExpandedCollectionId(id)
+                            appPreferences.removeHiddenCollectionId(id)
+                            hiddenCollectionIds = hiddenCollectionIds - id
+                        },
                         adbViewModel = adbViewModel,
                         broadcastViewModel = broadcastViewModel,
+                        collectionViewModel = collectionViewModel,
+                        collectionCommandViewModel = collectionCommandViewModel,
                     )
 
                     Box(
@@ -110,16 +156,20 @@ fun main() = application {
                             .draggable(
                                 orientation = Orientation.Horizontal,
                                 state = rememberDraggableState { delta ->
-                                    val newWidth = leftPanelWidth + with(density) { delta.toDp() }
-                                    leftPanelWidth = newWidth.coerceIn(150.dp, 400.dp)
+                                    val newWidth = (leftPanelWidth + with(density) { delta.toDp() }).coerceIn(150.dp, 400.dp)
+                                    leftPanelWidth = newWidth
+                                    appPreferences.setLeftPanelWidth(newWidth.value)
                                 }
                             ),
                     )
 
-                    if (visibleTabs.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize())
-                    } else {
-                        when (selectedTab) {
+                    when {
+                        visibleTabs.isEmpty() && selectedCollection == null -> Box(modifier = Modifier.fillMaxSize())
+                        selectedCollection != null -> CollectionCommandLayout(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = collectionCommandViewModel,
+                        )
+                        else -> when (selectedTab) {
                             MainTab.SEND_BROADCAST -> SendBroadcastCommandLayout(
                                 modifier = Modifier.fillMaxSize(),
                                 viewModel = broadcastViewModel,

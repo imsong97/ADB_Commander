@@ -12,6 +12,8 @@ import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
 import com.ch0pp4.adbcommander.executor.AdbExecutor
 import com.ch0pp4.adbcommander.executor.JvmAdbExecutor
 import com.ch0pp4.adbcommander.presentation.AdbViewModel
+import com.ch0pp4.adbcommander.presentation.CollectionCommandViewModel
+import com.ch0pp4.adbcommander.presentation.CollectionViewModel
 import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
 import kotlin.reflect.KClass
 
@@ -33,5 +35,13 @@ class AppContainer {
 
     val sendBroadcastViewModel: SendBroadcastViewModel by lazy {
         SendBroadcastViewModel(commandRepository, adbExecutor)
+    }
+
+    val collectionViewModel: CollectionViewModel by lazy {
+        CollectionViewModel(commandRepository)
+    }
+
+    val collectionCommandViewModel: CollectionCommandViewModel by lazy {
+        CollectionCommandViewModel(commandRepository, adbExecutor)
     }
 }

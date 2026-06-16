@@ -1,6 +1,8 @@
 package com.ch0pp4.adbcommander.local.database
 
 import com.ch0pp4.adbcommander.data.model.BroadcastExtra
+import com.ch0pp4.adbcommander.data.model.Collection
+import com.ch0pp4.adbcommander.data.model.CollectionSavedCommand
 import com.ch0pp4.adbcommander.data.model.ExtraType
 import com.ch0pp4.adbcommander.data.model.IntentCommandType
 import com.ch0pp4.adbcommander.data.model.SavedCommand
@@ -15,7 +17,6 @@ class SavedCommandEntity(id: EntityID<Int>) : IntEntity(id) {
     var command    by SavedCommandTable.command
     var sourceTab  by SavedCommandTable.sourceTab
     var intentType by SavedCommandTable.intentType
-    var isDefault  by SavedCommandTable.isDefault
     var createdAt  by SavedCommandTable.createdAt
     val extras     by SavedCommandExtraEntity referrersOn SavedCommandExtraTable.savedCommandId
 }
@@ -29,6 +30,55 @@ class SavedCommandExtraEntity(id: EntityID<Int>) : IntEntity(id) {
     var value        by SavedCommandExtraTable.value
 }
 
+class CollectionEntity(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<CollectionEntity>(CollectionTable)
+
+    var name      by CollectionTable.name
+    var createdAt by CollectionTable.createdAt
+}
+
+fun CollectionEntity.toDataModel() = Collection(id = id.value, name = name)
+
+class CollectionSavedCommandEntity(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<CollectionSavedCommandEntity>(CollectionSavedCommandTable)
+
+    var collectionId by CollectionSavedCommandTable.collectionId
+    var title        by CollectionSavedCommandTable.title
+    var command      by CollectionSavedCommandTable.command
+    var intentType   by CollectionSavedCommandTable.intentType
+    var createdAt    by CollectionSavedCommandTable.createdAt
+    val extras       by CollectionSavedCommandExtraEntity referrersOn CollectionSavedCommandExtraTable.savedCommandId
+}
+
+class CollectionSavedCommandExtraEntity(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<CollectionSavedCommandExtraEntity>(CollectionSavedCommandExtraTable)
+
+    var savedCommand by CollectionSavedCommandEntity referencedOn CollectionSavedCommandExtraTable.savedCommandId
+    var extraType    by CollectionSavedCommandExtraTable.extraType
+    var extra        by CollectionSavedCommandExtraTable.extra
+    var value        by CollectionSavedCommandExtraTable.value
+}
+
+fun CollectionSavedCommandEntity.toDataModel() = CollectionSavedCommand(
+    id = id.value,
+    collectionId = collectionId.value,
+    title = title,
+    command = command,
+    intentType = when (intentType) {
+        IntentType.NONE -> null
+        IntentType.BROADCAST -> IntentCommandType.BROADCAST
+        IntentType.START -> IntentCommandType.START
+        IntentType.STARTSERVICE -> IntentCommandType.START_SERVICE
+    },
+    extras = extras.map { extra ->
+        BroadcastExtra(
+            type = ExtraType.valueOf(extra.extraType),
+            extra = extra.extra,
+            value = extra.value,
+        )
+    },
+)
+
 fun SavedCommandEntity.toDataModel() = SavedCommand(
     id = id.value,
     title = title,
@@ -40,7 +90,6 @@ fun SavedCommandEntity.toDataModel() = SavedCommand(
         IntentType.STARTSERVICE -> IntentCommandType.START_SERVICE
         else -> IntentCommandType.BROADCAST
     },
-    isDefault = isDefault,
     extras = extras.map { extra ->
         BroadcastExtra(
             type = ExtraType.valueOf(extra.extraType),

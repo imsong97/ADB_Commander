@@ -1,7 +1,6 @@
 package com.ch0pp4.adbcommander.ui
 
 import androidx.compose.foundation.background
-import com.ch0pp4.adbcommander.ui.components.LoadingBar
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -26,10 +25,11 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import com.ch0pp4.adbcommander.ui.components.CommandTitleRow
 import com.ch0pp4.adbcommander.ui.components.DeleteIconButton
+import com.ch0pp4.adbcommander.ui.components.LoadingBar
 import com.ch0pp4.adbcommander.ui.components.ResultBox
 import com.ch0pp4.adbcommander.ui.components.ToastHost
 import com.ch0pp4.adbcommander.ui.components.rememberToastState
-import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
+import com.ch0pp4.adbcommander.presentation.CollectionCommandViewModel
 import com.ch0pp4.adbcommander.presentation.model.BroadcastExtraUiModel
 import com.ch0pp4.adbcommander.presentation.model.ExtraTypeList
 import com.ch0pp4.adbcommander.presentation.model.IntentCommandType
@@ -37,8 +37,8 @@ import com.ch0pp4.adbcommander.ui.theme.LightPrimaryContainerHover
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun SendBroadcastCommandLayout(
-    viewModel: SendBroadcastViewModel,
+fun CollectionCommandLayout(
+    viewModel: CollectionCommandViewModel,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -85,7 +85,7 @@ fun SendBroadcastCommandLayout(
                         onDismissRequest = { typeDropdownExpanded = false },
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     ) {
-                        IntentCommandType.entries.filter { it != IntentCommandType.ADB }.forEach { type ->
+                        IntentCommandType.entries.forEach { type ->
                             DropdownMenuItem(
                                 text = { Text(type.label, color = MaterialTheme.colorScheme.onSurface) },
                                 onClick = {
@@ -133,87 +133,98 @@ fun SendBroadcastCommandLayout(
                 HorizontalDivider()
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            if (state.commandType == IntentCommandType.ADB) {
                 Text(
-                    text = stringResource(Res.string.extras_label),
+                    text = stringResource(Res.string.execution_result),
                     style = MaterialTheme.typography.titleSmall,
                 )
-                IconButton(
-                    onClick = viewModel::onExtraAdd,
-                    modifier = Modifier.size(28.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Add,
-                        contentDescription = stringResource(Res.string.add_extra),
-                        modifier = Modifier.size(24.dp),
-                    )
-                }
-            }
-
-            ExtrasTable(
-                extras = state.extras,
-                onExtrasUpdate = viewModel::onExtrasUpdate,
-                onExtraDelete = viewModel::onExtraDelete,
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-            )
-
-    //        HorizontalDivider()
-
-            Text(
-                text = stringResource(Res.string.completed_command),
-                style = MaterialTheme.typography.titleSmall,
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
                 ResultBox(
-                    text = state.completedCommand,
-                    modifier = Modifier.weight(1f),
+                    text = state.executionResult,
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    scrollable = true,
                     selectable = true,
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
                 )
-                val successMsg = stringResource(Res.string.toast_copy_success)
-                val failureMsg = stringResource(Res.string.toast_copy_failure)
-                IconButton(
-                    onClick = {
-                        try {
-                            Toolkit.getDefaultToolkit().systemClipboard
-                                .setContents(StringSelection(state.completedCommand), null)
-                            toastState.show(successMsg)
-                        } catch (e: Exception) {
-                            toastState.show(failureMsg)
-                        }
-                    },
-                    enabled = state.completedCommand.isNotBlank(),
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(Icons.Outlined.ContentCopy, contentDescription = stringResource(Res.string.copy_command_description))
+                    Text(
+                        text = stringResource(Res.string.extras_label),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    IconButton(
+                        onClick = viewModel::onExtraAdd,
+                        modifier = Modifier.size(28.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Add,
+                            contentDescription = stringResource(Res.string.add_extra),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
                 }
+
+                CollectionExtrasTable(
+                    extras = state.extras,
+                    onExtrasUpdate = viewModel::onExtrasUpdate,
+                    onExtraDelete = viewModel::onExtraDelete,
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                )
+
+                Text(
+                    text = stringResource(Res.string.completed_command),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    ResultBox(
+                        text = state.completedCommand,
+                        modifier = Modifier.weight(1f),
+                        selectable = true,
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                    )
+                    val successMsg = stringResource(Res.string.toast_copy_success)
+                    val failureMsg = stringResource(Res.string.toast_copy_failure)
+                    IconButton(
+                        onClick = {
+                            try {
+                                Toolkit.getDefaultToolkit().systemClipboard
+                                    .setContents(StringSelection(state.completedCommand), null)
+                                toastState.show(successMsg)
+                            } catch (e: Exception) {
+                                toastState.show(failureMsg)
+                            }
+                        },
+                        enabled = state.completedCommand.isNotBlank(),
+                    ) {
+                        Icon(Icons.Outlined.ContentCopy, contentDescription = stringResource(Res.string.copy_command_description))
+                    }
+                }
+
+                Text(
+                    text = stringResource(Res.string.execution_result),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+
+                ResultBox(
+                    text = state.executionResult,
+                    modifier = Modifier.fillMaxWidth().height(80.dp),
+                    scrollable = true,
+                )
             }
-
-            Text(
-                text = stringResource(Res.string.execution_result),
-                style = MaterialTheme.typography.titleSmall,
-            )
-
-            ResultBox(
-                text = state.executionResult,
-                modifier = Modifier.fillMaxWidth().height(80.dp),
-                scrollable = true,
-            )
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ExtrasTable(
+private fun CollectionExtrasTable(
     extras: List<BroadcastExtraUiModel>,
     onExtrasUpdate: (Int, BroadcastExtraUiModel) -> Unit,
     onExtraDelete: (Int) -> Unit,
@@ -246,7 +257,7 @@ private fun ExtrasTable(
         } else {
             LazyColumn {
                 itemsIndexed(extras, key = { _, item -> item.id }) { index, extra ->
-                    ExtraRow(
+                    CollectionExtraRow(
                         extra = extra,
                         onUpdate = { updated -> onExtrasUpdate(index, updated) },
                         onDelete = { onExtraDelete(index) },
@@ -260,7 +271,7 @@ private fun ExtrasTable(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ExtraRow(
+private fun CollectionExtraRow(
     extra: BroadcastExtraUiModel,
     onUpdate: (BroadcastExtraUiModel) -> Unit,
     onDelete: () -> Unit,
