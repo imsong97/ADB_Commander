@@ -13,7 +13,10 @@ object DatabaseFactory {
         val dbFile = File(dbDir, "adbcommander.db")
 
         Database.connect(
-            url = "jdbc:sqlite:${dbFile.absolutePath}",
+            url = "jdbc:sqlite:${dbFile.absolutePath}?" +
+                    "journal_mode=WAL" + // WAL모드 - 동시성향상
+                    "&busy_timeout=5000" + // 락 대기 5초
+                    "&synchronous=NORMAL", // fsync 최적화
             driver = "org.sqlite.JDBC"
         )
 
