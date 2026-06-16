@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.btn_cancel
 import adbcommander.composeapp.generated.resources.btn_delete
-import com.ch0pp4.adbcommander.ui.theme.LightOnSurfaceVariant
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -37,7 +36,7 @@ fun DeleteConfirmDialog(
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = LightOnSurfaceVariant),
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
             ) {
                 Text(stringResource(Res.string.btn_cancel))
             }
