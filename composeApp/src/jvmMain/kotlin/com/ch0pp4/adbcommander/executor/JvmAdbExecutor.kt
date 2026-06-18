@@ -23,7 +23,7 @@ class JvmAdbExecutor(
 
             // prevent deadlock
             val outputDeferred = async {
-                process.inputStream.bufferedReader().readText()
+                process.inputStream.bufferedReader().use { it.readText() }
             }
             val completed = process.waitFor(30L, TimeUnit.SECONDS)
 
