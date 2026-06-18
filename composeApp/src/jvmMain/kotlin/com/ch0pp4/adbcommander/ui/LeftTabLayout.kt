@@ -132,12 +132,12 @@ fun LeftTabLayout(
         HorizontalDivider()
 
         val listState = rememberLazyListState()
-        var hasScrolledToTop by remember { mutableStateOf(false) }
-        LaunchedEffect(allCollections) {
-            if (!hasScrolledToTop && allCollections.isNotEmpty()) {
+        var prevCollectionCount by remember { mutableStateOf(0) }
+        LaunchedEffect(allCollections.size) {
+            if (allCollections.size > prevCollectionCount) {
                 listState.scrollToItem(0)
-                hasScrolledToTop = true
             }
+            prevCollectionCount = allCollections.size
         }
         LazyColumn(state = listState, modifier = Modifier.weight(1f)) {
             items(
