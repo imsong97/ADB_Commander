@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -244,7 +245,13 @@ private fun ExtrasTable(
                 )
             }
         } else {
-            LazyColumn {
+            val listState = rememberLazyListState()
+            var prevExtrasCount by remember { mutableStateOf(extras.size) }
+            LaunchedEffect(extras.size) {
+                if (extras.size > prevExtrasCount) listState.scrollToItem(extras.lastIndex)
+                prevExtrasCount = extras.size
+            }
+            LazyColumn(state = listState) {
                 itemsIndexed(extras, key = { _, item -> item.id }) { index, extra ->
                     ExtraRow(
                         extra = extra,
