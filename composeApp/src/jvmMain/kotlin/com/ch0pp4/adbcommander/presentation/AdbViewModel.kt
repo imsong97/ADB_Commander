@@ -114,6 +114,5 @@ class AdbViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        viewModelScope.cancel()
     }
 }

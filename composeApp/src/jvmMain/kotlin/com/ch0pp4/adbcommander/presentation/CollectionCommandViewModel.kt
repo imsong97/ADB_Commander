@@ -244,6 +244,5 @@ class CollectionCommandViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        viewModelScope.cancel()
     }
 }

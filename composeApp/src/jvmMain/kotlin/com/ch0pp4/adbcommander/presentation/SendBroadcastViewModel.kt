@@ -207,6 +207,5 @@ class SendBroadcastViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        viewModelScope.cancel()
     }
 }
