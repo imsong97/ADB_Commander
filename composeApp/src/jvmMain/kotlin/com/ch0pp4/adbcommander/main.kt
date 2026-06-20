@@ -158,7 +158,9 @@ fun main() = application {
                                 state = rememberDraggableState { delta ->
                                     val newWidth = (leftPanelWidth + with(density) { delta.toDp() }).coerceIn(150.dp, 400.dp)
                                     leftPanelWidth = newWidth
-                                    appPreferences.setLeftPanelWidth(newWidth.value)
+                                },
+                                onDragStopped = {
+                                    appPreferences.setLeftPanelWidth(leftPanelWidth.value)
                                 }
                             ),
                     )
