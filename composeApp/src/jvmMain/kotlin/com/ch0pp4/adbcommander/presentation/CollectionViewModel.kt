@@ -1,15 +1,14 @@
 package com.ch0pp4.adbcommander.presentation
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.ch0pp4.adbcommander.data.CommandRepository
 import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
 import com.ch0pp4.adbcommander.presentation.model.toPresentation
+import com.ch0pp4.adbcommander.presentation.viewmodel.DesktopViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class CollectionViewModel(private val repository: CommandRepository) : ViewModel() {
+class CollectionViewModel(private val repository: CommandRepository) : DesktopViewModel() {
 
     private val _collections = MutableStateFlow(listOf<UserCollectionUiModel>())
     val collections: StateFlow<List<UserCollectionUiModel>> = _collections

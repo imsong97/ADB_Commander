@@ -1,14 +1,12 @@
 package com.ch0pp4.adbcommander.presentation
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.ch0pp4.adbcommander.data.CommandRepository
 import com.ch0pp4.adbcommander.executor.AdbExecutor
 import com.ch0pp4.adbcommander.presentation.model.AdbUiState
 import com.ch0pp4.adbcommander.presentation.model.SavedCommandUiModel
 import com.ch0pp4.adbcommander.presentation.model.toDisplayString
 import com.ch0pp4.adbcommander.presentation.model.toPresentation
-import kotlinx.coroutines.cancel
+import com.ch0pp4.adbcommander.presentation.viewmodel.DesktopViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +16,7 @@ import kotlinx.coroutines.launch
 class AdbViewModel(
     private val commandRepository: CommandRepository,
     private val executor: AdbExecutor,
-) : ViewModel() {
+) : DesktopViewModel() {
 
     private val _uiState = MutableStateFlow(AdbUiState())
     val uiState: StateFlow<AdbUiState> = _uiState.asStateFlow()
@@ -112,7 +110,4 @@ class AdbViewModel(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-    }
 }
