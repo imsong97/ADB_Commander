@@ -4,25 +4,8 @@ import com.ch0pp4.adbcommander.data.model.BroadcastExtra
 import com.ch0pp4.adbcommander.data.model.Collection
 import com.ch0pp4.adbcommander.data.model.CollectionSavedCommand
 import com.ch0pp4.adbcommander.data.model.IntentCommandType
-import com.ch0pp4.adbcommander.data.model.SavedCommand
 
 interface LocalDataSource {
-    suspend fun save(
-        title: String,
-        command: String,
-        intentType: IntentCommandType? = null,
-        extras: List<BroadcastExtra>
-    ): Int
-    suspend fun getByTab(sourceTab: String): List<SavedCommand>
-    suspend fun deleteById(id: Int): Int
-    suspend fun updateTitle(id: Int, title: String): Int
-    suspend fun updateContent(
-        id: Int,
-        title: String,
-        command: String,
-        intentType: IntentCommandType? = null,
-        extras: List<BroadcastExtra> = emptyList(),
-    ): Int
     suspend fun saveCollection(name: String): Int
     suspend fun getAllCollections(): List<Collection>
     suspend fun deleteCollection(id: Int): Int

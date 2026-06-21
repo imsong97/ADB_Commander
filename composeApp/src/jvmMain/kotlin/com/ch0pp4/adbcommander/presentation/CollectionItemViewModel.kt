@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CollectionCommandViewModel(
+class CollectionItemViewModel(
     private val commandRepository: CommandRepository,
     private val executor: AdbExecutor,
 ) : DesktopViewModel() {
