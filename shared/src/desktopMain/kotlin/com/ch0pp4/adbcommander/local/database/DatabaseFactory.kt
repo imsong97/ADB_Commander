@@ -4,6 +4,7 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
+import java.time.LocalDateTime
 
 object DatabaseFactory {
 
@@ -11,6 +12,7 @@ object DatabaseFactory {
         val dbDir = File(findProjectRoot(), ".adbcommander")
         dbDir.mkdirs()
         val dbFile = File(dbDir, "adbcommander.db")
+        val isFirstRun = !dbFile.exists()
 
         Database.connect(
             url = "jdbc:sqlite:${dbFile.absolutePath}?" +
@@ -26,6 +28,10 @@ object DatabaseFactory {
                 CollectionSavedCommandTable,
                 CollectionSavedCommandExtraTable,
             )
+
+            if (isFirstRun) {
+                seedSampleCommands()
+            }
         }
 
     }
@@ -37,5 +43,34 @@ object DatabaseFactory {
             dir = dir.parentFile
         }
         return File(System.getProperty("user.dir"))
+    }
+
+    private fun seedSampleCommands() {
+        val collection = CollectionEntity.new {
+            name = "Example"
+            createdAt = LocalDateTime.now()
+        }
+
+        CollectionSavedCommandEntity.new {
+            collectionId = collection.id
+            title = "디바이스 목록"
+            command = "adb devices"
+            intentType = IntentType.NONE
+            createdAt = LocalDateTime.now()
+        }
+
+        val broadcastCommand = CollectionSavedCommandEntity.new {
+            collectionId = collection.id
+            title = "배터리 레벨 변경"
+            command = "adb shell am broadcast -a android.intent.action.BATTERY_CHANGED --ei level 50"
+            intentType = IntentType.BROADCAST
+            createdAt = LocalDateTime.now()
+        }
+        CollectionSavedCommandExtraEntity.new {
+            savedCommand = broadcastCommand
+            extraType = "INT"
+            extra = "level"
+            value = "50"
+        }
     }
 }
