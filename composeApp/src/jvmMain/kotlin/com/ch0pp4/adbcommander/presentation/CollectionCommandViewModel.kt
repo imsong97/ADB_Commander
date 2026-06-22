@@ -1,5 +1,7 @@
 package com.ch0pp4.adbcommander.presentation
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ch0pp4.adbcommander.data.CommandRepository
 import com.ch0pp4.adbcommander.executor.AdbExecutor
 import com.ch0pp4.adbcommander.presentation.model.BroadcastExtraUiModel
@@ -9,7 +11,7 @@ import com.ch0pp4.adbcommander.presentation.model.SendBroadcastUiState
 import com.ch0pp4.adbcommander.presentation.model.toData
 import com.ch0pp4.adbcommander.presentation.model.toDisplayString
 import com.ch0pp4.adbcommander.presentation.model.toPresentation
-import com.ch0pp4.adbcommander.presentation.viewmodel.DesktopViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +21,7 @@ import kotlinx.coroutines.launch
 class CollectionCommandViewModel(
     private val commandRepository: CommandRepository,
     private val executor: AdbExecutor,
-) : DesktopViewModel() {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SendBroadcastUiState(commandType = IntentCommandType.ADB))
     val uiState: StateFlow<SendBroadcastUiState> = _uiState.asStateFlow()
@@ -240,4 +242,7 @@ class CollectionCommandViewModel(
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+    }
 }

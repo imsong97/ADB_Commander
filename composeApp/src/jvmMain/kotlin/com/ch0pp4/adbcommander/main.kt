@@ -19,10 +19,12 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import java.awt.Cursor
+import androidx.lifecycle.ViewModelStore
 import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.adb_commander_icon
 import adbcommander.composeapp.generated.resources.app_name
 import androidx.compose.material3.MaterialTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ch0pp4.adbcommander.local.database.DatabaseFactory
 import com.ch0pp4.adbcommander.di.AppContainer
 import com.ch0pp4.adbcommander.preference.AppPreferences
@@ -44,22 +46,23 @@ import org.jetbrains.compose.resources.stringResource
 fun main() = application {
     DatabaseFactory.init()
     val windowState = rememberWindowState(size = DpSize(width = 1200.dp, height = 700.dp))
+    val viewModelStore = remember { ViewModelStore() }
     val appContainer = remember { AppContainer() }
     val appPreferences = remember { AppPreferences() }
 
     Window(
         onCloseRequest = {
-            appContainer.clear()
             exitApplication()
+            viewModelStore.clear()
         },
         title = stringResource(Res.string.app_name),
         icon = painterResource(Res.drawable.adb_commander_icon),
         state = windowState,
     ) {
-        val adbViewModel = appContainer.adbViewModel
-        val broadcastViewModel = appContainer.sendBroadcastViewModel
-        val collectionViewModel = appContainer.collectionViewModel
-        val collectionCommandViewModel = appContainer.collectionCommandViewModel
+        val adbViewModel: AdbViewModel = viewModel { appContainer.adbViewModel }
+        val broadcastViewModel: SendBroadcastViewModel = viewModel { appContainer.sendBroadcastViewModel }
+        val collectionViewModel: CollectionViewModel = viewModel { appContainer.collectionViewModel }
+        val collectionCommandViewModel: CollectionCommandViewModel = viewModel { appContainer.collectionCommandViewModel }
         var selectedTab by remember { mutableStateOf(MainTab.SEND_BROADCAST) }
         var selectedCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
         var visibleTabs by remember { mutableStateOf(appPreferences.getVisibleTabs()) }
