@@ -1,21 +1,13 @@
 package com.ch0pp4.adbcommander.di
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.ch0pp4.adbcommander.data.CommandRepository
 import com.ch0pp4.adbcommander.data.CommandRepositoryImpl
 import com.ch0pp4.adbcommander.local.LocalDataSourceImpl
 import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
 import com.ch0pp4.adbcommander.executor.AdbExecutor
 import com.ch0pp4.adbcommander.executor.JvmAdbExecutor
-import com.ch0pp4.adbcommander.presentation.AdbViewModel
-import com.ch0pp4.adbcommander.presentation.CollectionCommandViewModel
+import com.ch0pp4.adbcommander.presentation.CollectionItemViewModel
 import com.ch0pp4.adbcommander.presentation.CollectionViewModel
-import com.ch0pp4.adbcommander.presentation.SendBroadcastViewModel
-import kotlin.reflect.KClass
 
 class AppContainer {
 
@@ -28,20 +20,11 @@ class AppContainer {
     val commandRepository: CommandRepository by lazy {
         CommandRepositoryImpl(localDataSource)
     }
-
-    val adbViewModel: AdbViewModel by lazy {
-        AdbViewModel(commandRepository, adbExecutor)
-    }
-
-    val sendBroadcastViewModel: SendBroadcastViewModel by lazy {
-        SendBroadcastViewModel(commandRepository, adbExecutor)
-    }
-
     val collectionViewModel: CollectionViewModel by lazy {
         CollectionViewModel(commandRepository)
     }
 
-    val collectionCommandViewModel: CollectionCommandViewModel by lazy {
-        CollectionCommandViewModel(commandRepository, adbExecutor)
+    val collectionCommandViewModel: CollectionItemViewModel by lazy {
+        CollectionItemViewModel(commandRepository, adbExecutor)
     }
 }
