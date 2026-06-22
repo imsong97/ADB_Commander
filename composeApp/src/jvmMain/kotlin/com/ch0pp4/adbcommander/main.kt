@@ -20,12 +20,16 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import java.awt.Cursor
+import androidx.lifecycle.ViewModelStore
 import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.adb_commander_icon
 import adbcommander.composeapp.generated.resources.app_name
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ch0pp4.adbcommander.local.database.DatabaseFactory
 import com.ch0pp4.adbcommander.di.AppContainer
 import com.ch0pp4.adbcommander.preference.AppPreferences
+import com.ch0pp4.adbcommander.presentation.CollectionItemViewModel
+import com.ch0pp4.adbcommander.presentation.CollectionViewModel
 import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
 import com.ch0pp4.adbcommander.ui.AppMenuBar
 import com.ch0pp4.adbcommander.ui.CollectionCommandLayout
@@ -37,20 +41,21 @@ import org.jetbrains.compose.resources.stringResource
 fun main() = application {
     DatabaseFactory.init()
     val windowState = rememberWindowState(size = DpSize(width = 1200.dp, height = 700.dp))
+    val viewModelStore = remember { ViewModelStore() }
     val appContainer = remember { AppContainer() }
     val appPreferences = remember { AppPreferences() }
 
     Window(
         onCloseRequest = {
-            appContainer.clear()
             exitApplication()
+            viewModelStore.clear()
         },
         title = stringResource(Res.string.app_name),
         icon = painterResource(Res.drawable.adb_commander_icon),
         state = windowState,
     ) {
-        val collectionViewModel = appContainer.collectionViewModel
-        val collectionCommandViewModel = appContainer.collectionItemViewModel
+        val collectionViewModel: CollectionViewModel = viewModel { appContainer.collectionViewModel }
+        val collectionCommandViewModel: CollectionItemViewModel = viewModel { appContainer.collectionCommandViewModel }
         var selectedCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
         val userCollections by collectionViewModel.collections.collectAsState()
         var hiddenCollectionIds by remember { mutableStateOf(appPreferences.getHiddenCollectionIds()) }

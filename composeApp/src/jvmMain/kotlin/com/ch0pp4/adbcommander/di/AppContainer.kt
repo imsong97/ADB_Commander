@@ -8,26 +8,23 @@ import com.ch0pp4.adbcommander.executor.AdbExecutor
 import com.ch0pp4.adbcommander.executor.JvmAdbExecutor
 import com.ch0pp4.adbcommander.presentation.CollectionItemViewModel
 import com.ch0pp4.adbcommander.presentation.CollectionViewModel
-import com.ch0pp4.adbcommander.presentation.viewmodel.DesktopViewModel
 
 class AppContainer {
 
-    private val viewModels = mutableListOf<DesktopViewModel>()
-    private fun <T : DesktopViewModel> T.register(): T = this.also { viewModels.add(it) }
-
     val adbExecutor: AdbExecutor by lazy { JvmAdbExecutor() }
 
-    val localDataSource: LocalDataSource by lazy { LocalDataSourceImpl() }
+    val localDataSource: LocalDataSource by lazy {
+        LocalDataSourceImpl()
+    }
 
-    val commandRepository: CommandRepository by lazy { CommandRepositoryImpl(localDataSource) }
-
+    val commandRepository: CommandRepository by lazy {
+        CommandRepositoryImpl(localDataSource)
+    }
     val collectionViewModel: CollectionViewModel by lazy {
-        CollectionViewModel(commandRepository).register()
+        CollectionViewModel(commandRepository)
     }
 
-    val collectionItemViewModel: CollectionItemViewModel by lazy {
-        CollectionItemViewModel(commandRepository, adbExecutor).register()
+    val collectionCommandViewModel: CollectionItemViewModel by lazy {
+        CollectionItemViewModel(commandRepository, adbExecutor)
     }
-
-    fun clear() = viewModels.forEach { it.cancel() }
 }
