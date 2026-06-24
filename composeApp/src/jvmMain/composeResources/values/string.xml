@@ -53,5 +53,11 @@
     <string name="dialog_rename_title">Rename</string>
 
     <!-- Menu bar -->
+    <string name="menu_file">File</string>
+    <string name="menu_export">Export…</string>
     <string name="menu_view">View</string>
+
+    <!-- Export -->
+    <string name="toast_export_success">Exported successfully</string>
+    <string name="toast_export_failure">Failed to export</string>
 </resources>

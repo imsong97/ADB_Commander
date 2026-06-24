@@ -5,9 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.ch0pp4.adbcommander.data.CommandRepository
 import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
 import com.ch0pp4.adbcommander.presentation.model.toPresentation
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 class CollectionViewModel(private val repository: CommandRepository) : ViewModel() {
 
@@ -43,6 +46,29 @@ class CollectionViewModel(private val repository: CommandRepository) : ViewModel
         viewModelScope.launch {
             repository.renameCollection(id, newName)
             loadCollections()
+        }
+    }
+
+    fun exportToFile(file: File, onComplete: (success: Boolean) -> Unit) {
+        viewModelScope.launch {
+            val success = try {
+                val text = buildExportText()
+                withContext(Dispatchers.IO) { file.writeText(text) }
+                true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
+            onComplete(success)
+        }
+    }
+
+    private suspend fun buildExportText(): String = buildString {
+        repository.getAllCollections().forEach { collection ->
+            append("[${collection.name}]\n")
+            repository.getByCollection(collection.id).forEach { command ->
+                append("${command.title} : ${command.command}\n")
+            }
         }
     }
 }
