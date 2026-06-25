@@ -34,6 +34,7 @@ import com.ch0pp4.adbcommander.di.AppContainer
 import com.ch0pp4.adbcommander.preference.AppPreferences
 import com.ch0pp4.adbcommander.presentation.CollectionItemViewModel
 import com.ch0pp4.adbcommander.presentation.CollectionViewModel
+import com.ch0pp4.adbcommander.presentation.model.ExportResult
 import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
 import com.ch0pp4.adbcommander.ui.AppMenuBar
 import com.ch0pp4.adbcommander.ui.CollectionCommandLayout
@@ -73,6 +74,17 @@ fun main() = application {
             selectedCollection = userCollections.find { it.id == selectedCollection?.id }
         }
 
+        LaunchedEffect(collectionViewModel) {
+            collectionViewModel.exportResult.collect { result ->
+                when (result) {
+                    ExportResult.Success -> exportSuccessMsg
+                    is ExportResult.Failure -> result.message.ifBlank { exportFailureMsg }
+                }.also {
+                    toastState.show(it)
+                }
+            }
+        }
+
         AppMenuBar(
             userCollections = userCollections,
             hiddenCollectionIds = hiddenCollectionIds,
@@ -94,9 +106,7 @@ fun main() = application {
                 val fileName = dialog.file
                 if (directory != null && fileName != null) {
                     val targetFile = File(directory, if (fileName.endsWith(".txt")) fileName else "$fileName.txt")
-                    collectionViewModel.exportToFile(targetFile) { success ->
-                        toastState.show(if (success) exportSuccessMsg else exportFailureMsg)
-                    }
+                    collectionViewModel.exportToFile(targetFile)
                 }
             },
         )
