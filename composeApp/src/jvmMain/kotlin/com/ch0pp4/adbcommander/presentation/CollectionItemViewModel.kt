@@ -125,7 +125,7 @@ class CollectionItemViewModel(
 
     fun selectItem(item: SavedCommandUiModel) {
         val (commandType, primaryValue) = if (item.intentType == IntentCommandType.ADB) {
-            IntentCommandType.ADB to item.command.removePrefix("adb ").trim()
+            IntentCommandType.ADB to item.command
         } else {
             val prefix = "adb shell ${item.intentType.adbCommand} ${item.intentType.actionFlag} "
             item.intentType to item.command.removePrefix(prefix).substringBefore(" --").trim()
@@ -229,7 +229,7 @@ class CollectionItemViewModel(
     private fun buildCommand(state: SendBroadcastUiState): String {
         if (state.primaryValue.isBlank()) return ""
         return when (state.commandType) {
-            IntentCommandType.ADB -> "adb ${state.primaryValue}"
+            IntentCommandType.ADB -> state.primaryValue
             else -> {
                 val sb = StringBuilder("adb shell ${state.commandType.adbCommand} ${state.commandType.actionFlag} ${state.primaryValue}")
                 state.extras.forEach { extra ->

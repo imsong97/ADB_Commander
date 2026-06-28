@@ -20,20 +20,27 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import java.awt.Cursor
+import java.awt.FileDialog
+import java.io.File
 import androidx.lifecycle.ViewModelStore
 import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.adb_commander_icon
 import adbcommander.composeapp.generated.resources.app_name
+import adbcommander.composeapp.generated.resources.toast_export_failure
+import adbcommander.composeapp.generated.resources.toast_export_success
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ch0pp4.adbcommander.local.database.DatabaseFactory
 import com.ch0pp4.adbcommander.di.AppContainer
 import com.ch0pp4.adbcommander.preference.AppPreferences
 import com.ch0pp4.adbcommander.presentation.CollectionItemViewModel
 import com.ch0pp4.adbcommander.presentation.CollectionViewModel
+import com.ch0pp4.adbcommander.presentation.model.ExportResult
 import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
 import com.ch0pp4.adbcommander.ui.AppMenuBar
 import com.ch0pp4.adbcommander.ui.CollectionCommandLayout
 import com.ch0pp4.adbcommander.ui.LeftTabLayout
+import com.ch0pp4.adbcommander.ui.components.ToastHost
+import com.ch0pp4.adbcommander.ui.components.rememberToastState
 import com.ch0pp4.adbcommander.ui.theme.AdbCommanderTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -59,9 +66,23 @@ fun main() = application {
         var selectedCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
         val userCollections by collectionViewModel.collections.collectAsState()
         var hiddenCollectionIds by remember { mutableStateOf(appPreferences.getHiddenCollectionIds()) }
+        val toastState = rememberToastState()
+        val exportSuccessMsg = stringResource(Res.string.toast_export_success)
+        val exportFailureMsg = stringResource(Res.string.toast_export_failure)
 
         LaunchedEffect(userCollections) {
             selectedCollection = userCollections.find { it.id == selectedCollection?.id }
+        }
+
+        LaunchedEffect(collectionViewModel) {
+            collectionViewModel.exportResult.collect { result ->
+                when (result) {
+                    ExportResult.Success -> exportSuccessMsg
+                    is ExportResult.Failure -> result.message.ifBlank { exportFailureMsg }
+                }.also {
+                    toastState.show(it)
+                }
+            }
         }
 
         AppMenuBar(
@@ -76,6 +97,18 @@ fun main() = application {
                     collectionCommandViewModel.onReset()
                 }
             },
+            onExportClick = {
+                val dialog = FileDialog(window, "Export Commands", FileDialog.SAVE).apply {
+                    file = "commands.txt"
+                    isVisible = true
+                }
+                val directory = dialog.directory
+                val fileName = dialog.file
+                if (directory != null && fileName != null) {
+                    val targetFile = File(directory, if (fileName.endsWith(".txt")) fileName else "$fileName.txt")
+                    collectionViewModel.exportToFile(targetFile)
+                }
+            },
         )
 
         AdbCommanderTheme {
@@ -83,61 +116,63 @@ fun main() = application {
             val density = LocalDensity.current
 
             Surface(modifier = Modifier.fillMaxSize()) {
-                Row(modifier = Modifier.fillMaxSize()) {
-                    LeftTabLayout(
-                        modifier = Modifier
-                            .width(leftPanelWidth)
-                            .fillMaxHeight()
-                            .padding(top = 8.dp, start = 8.dp, bottom = 8.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                                shape = RoundedCornerShape(12.dp),
-                            ),
-                        selectedCollection = selectedCollection,
-                        hiddenCollectionIds = hiddenCollectionIds,
-                        initialExpandedCollections = remember { appPreferences.getExpandedCollectionIds() },
-                        onCollectionSelected = { collection ->
-                            selectedCollection = collection
-                            if (collection != null) {
-                                collectionCommandViewModel.setCollection(collection.id)
-                            }
-                        },
-                        onExpandedCollectionsChange = { appPreferences.setExpandedCollectionIds(it) },
-                        onCollectionDeleted = { id ->
-                            appPreferences.removeExpandedCollectionId(id)
-                            appPreferences.removeHiddenCollectionId(id)
-                            hiddenCollectionIds = hiddenCollectionIds - id
-                        },
-                        collectionViewModel = collectionViewModel,
-                        collectionItemViewModel = collectionCommandViewModel,
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .width(4.dp)
-                            .fillMaxHeight()
-                            .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                            .draggable(
-                                orientation = Orientation.Horizontal,
-                                state = rememberDraggableState { delta ->
-                                    val newWidth = (leftPanelWidth + with(density) { delta.toDp() }).coerceIn(150.dp, 400.dp)
-                                    leftPanelWidth = newWidth
-                                },
-                                onDragStopped = {
-                                    appPreferences.setLeftPanelWidth(leftPanelWidth.value)
+                ToastHost(state = toastState, modifier = Modifier.fillMaxSize()) {
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        LeftTabLayout(
+                            modifier = Modifier
+                                .width(leftPanelWidth)
+                                .fillMaxHeight()
+                                .padding(top = 8.dp, start = 8.dp, bottom = 8.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                    shape = RoundedCornerShape(12.dp),
+                                ),
+                            selectedCollection = selectedCollection,
+                            hiddenCollectionIds = hiddenCollectionIds,
+                            initialExpandedCollections = remember { appPreferences.getExpandedCollectionIds() },
+                            onCollectionSelected = { collection ->
+                                selectedCollection = collection
+                                if (collection != null) {
+                                    collectionCommandViewModel.setCollection(collection.id)
                                 }
-                            ),
-                    )
-
-                    if (selectedCollection != null) {
-                        CollectionCommandLayout(
-                            modifier = Modifier.fillMaxSize(),
-                            viewModel = collectionCommandViewModel,
+                            },
+                            onExpandedCollectionsChange = { appPreferences.setExpandedCollectionIds(it) },
+                            onCollectionDeleted = { id ->
+                                appPreferences.removeExpandedCollectionId(id)
+                                appPreferences.removeHiddenCollectionId(id)
+                                hiddenCollectionIds = hiddenCollectionIds - id
+                            },
+                            collectionViewModel = collectionViewModel,
+                            collectionItemViewModel = collectionCommandViewModel,
                         )
-                    } else {
-                        Box(modifier = Modifier.fillMaxSize())
+
+                        Box(
+                            modifier = Modifier
+                                .width(4.dp)
+                                .fillMaxHeight()
+                                .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
+                                .draggable(
+                                    orientation = Orientation.Horizontal,
+                                    state = rememberDraggableState { delta ->
+                                        val newWidth = (leftPanelWidth + with(density) { delta.toDp() }).coerceIn(150.dp, 400.dp)
+                                        leftPanelWidth = newWidth
+                                    },
+                                    onDragStopped = {
+                                        appPreferences.setLeftPanelWidth(leftPanelWidth.value)
+                                    }
+                                ),
+                        )
+
+                        if (selectedCollection != null) {
+                            CollectionCommandLayout(
+                                modifier = Modifier.fillMaxSize(),
+                                viewModel = collectionCommandViewModel,
+                            )
+                        } else {
+                            Box(modifier = Modifier.fillMaxSize())
+                        }
                     }
                 }
             }
