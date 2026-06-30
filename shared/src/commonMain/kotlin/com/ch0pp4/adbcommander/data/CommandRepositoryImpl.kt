@@ -33,6 +33,9 @@ class CommandRepositoryImpl(
     override suspend fun deleteCollectionCommand(id: Int): Int =
         localDataSource.deleteCollectionCommand(id)
 
+    override suspend fun reorderCollections(orderedIds: List<Int>) =
+        localDataSource.reorderCollections(orderedIds)
+
     override suspend fun renameCollectionCommand(id: Int, title: String): Int =
         localDataSource.renameCollectionCommand(id, title)
 

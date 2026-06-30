@@ -59,6 +59,7 @@ fun TabSection(
     onItemSelected: (SavedCommandUiModel) -> Unit,
     onItemDeleted: (SavedCommandUiModel) -> Unit,
     onItemRenamed: (SavedCommandUiModel, String) -> Unit,
+    headerModifier: Modifier = Modifier,
     onRenameClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
 ) {
@@ -67,6 +68,7 @@ fun TabSection(
         expanded = expanded,
         onClick = onHeaderClick,
         onToggleClick = onToggleClick,
+        modifier = headerModifier,
         onRenameClick = onRenameClick,
         onDeleteClick = onDeleteClick,
     )
@@ -95,6 +97,7 @@ fun TreeTabHeader(
     expanded: Boolean,
     onClick: () -> Unit,
     onToggleClick: () -> Unit,
+    modifier: Modifier = Modifier,
     onAddClick: (() -> Unit)? = null,
     onRenameClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
@@ -104,7 +107,7 @@ fun TreeTabHeader(
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
             .hoverable(interactionSource)

@@ -25,9 +25,11 @@ class LocalDataSourceImpl(
 
     override suspend fun saveCollection(name: String): Int = withContext(context = dispatcher) {
         transaction {
+            CollectionEntity.all().forEach { it.sortOrder += 1 }
             CollectionEntity.new {
                 this.name = name
                 this.createdAt = LocalDateTime.now()
+                this.sortOrder = 0
             }.id.value
         }
     }
@@ -36,8 +38,16 @@ class LocalDataSourceImpl(
         transaction {
             CollectionEntity
                 .all()
-                .orderBy(CollectionTable.createdAt to SortOrder.DESC)
+                .orderBy(CollectionTable.sortOrder to SortOrder.ASC)
                 .map { it.toDataModel() }
+        }
+    }
+
+    override suspend fun reorderCollections(orderedIds: List<Int>) = withContext(context = dispatcher) {
+        transaction {
+            orderedIds.forEachIndexed { index, id ->
+                CollectionEntity.findById(id)?.sortOrder = index
+            }
         }
     }
 

@@ -14,9 +14,10 @@ class CollectionEntity(id: EntityID<Int>) : IntEntity(id) {
 
     var name      by CollectionTable.name
     var createdAt by CollectionTable.createdAt
+    var sortOrder by CollectionTable.sortOrder
 }
 
-fun CollectionEntity.toDataModel() = Collection(id = id.value, name = name)
+fun CollectionEntity.toDataModel() = Collection(id = id.value, name = name, sortOrder = sortOrder)
 
 class CollectionSavedCommandEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<CollectionSavedCommandEntity>(CollectionSavedCommandTable)

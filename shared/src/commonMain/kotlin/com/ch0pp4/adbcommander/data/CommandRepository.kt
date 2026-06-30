@@ -19,6 +19,7 @@ interface CommandRepository {
     ): Int
     suspend fun getByCollection(collectionId: Int): List<CollectionSavedCommand>
     suspend fun deleteCollectionCommand(id: Int): Int
+    suspend fun reorderCollections(orderedIds: List<Int>)
     suspend fun renameCollectionCommand(id: Int, title: String): Int
     suspend fun updateCollectionCommand(
         id: Int,

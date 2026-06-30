@@ -23,6 +23,17 @@ object DatabaseFactory {
         )
 
         transaction {
+            val hasSortOrder = exec("PRAGMA table_info(collection)") { rs ->
+                var found = false
+                while (rs.next()) {
+                    if (rs.getString("name") == "sort_order") found = true
+                }
+                found
+            } == true
+            if (!hasSortOrder) {
+                exec("ALTER TABLE collection ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0")
+            }
+
             SchemaUtils.create(
                 CollectionTable,
                 CollectionSavedCommandTable,
@@ -31,6 +42,13 @@ object DatabaseFactory {
 
             if (isFirstRun) {
                 seedSampleCommands()
+            } else {
+                // sort_order가 모두 0이면 createdAt 역순으로 초기값 설정
+                val all = CollectionEntity.all().toList()
+                if (all.size > 1 && all.all { it.sortOrder == 0 }) {
+                    all.sortedByDescending { it.createdAt }
+                        .forEachIndexed { index, entity -> entity.sortOrder = index }
+                }
             }
         }
 
