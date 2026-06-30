@@ -114,18 +114,16 @@ fun LeftTabLayout(
                     expanded = expandedCollections.contains(collection.id),
                     items = collectionItems[collection.id] ?: emptyList(),
                     selectedItemId = if (selectedCollection?.id == collection.id) collectionCommandState.selectedItemId else null,
-                    onHeaderClick = {
-                        if (expandedCollections.contains(collection.id)) {
-                            expandedCollections = expandedCollections - collection.id
+                    onToggleClick = {
+                        expandedCollections = if (collection.id in expandedCollections) {
+                            expandedCollections - collection.id
                         } else {
-                            expandedCollections = expandedCollections + collection.id
-                            if (selectedCollection?.id != collection.id) {
-                                collectionItemViewModel.onReset()
-                                onCollectionSelected(collection)
-                            } else {
-                                collectionItemViewModel.loadCollectionItems(collection.id)
-                            }
+                            expandedCollections + collection.id
                         }
+                    },
+                    onHeaderClick = {
+                        collectionItemViewModel.onReset()
+                        onCollectionSelected(collection)
                     },
                     onItemSelected = { item ->
                         onCollectionSelected(collection)

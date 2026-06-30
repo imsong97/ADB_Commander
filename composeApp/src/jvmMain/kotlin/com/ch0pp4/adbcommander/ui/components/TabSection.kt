@@ -55,6 +55,7 @@ fun TabSection(
     items: List<SavedCommandUiModel>,
     selectedItemId: Int?,
     onHeaderClick: () -> Unit,
+    onToggleClick: () -> Unit,
     onItemSelected: (SavedCommandUiModel) -> Unit,
     onItemDeleted: (SavedCommandUiModel) -> Unit,
     onItemRenamed: (SavedCommandUiModel, String) -> Unit,
@@ -65,6 +66,7 @@ fun TabSection(
         label = label,
         expanded = expanded,
         onClick = onHeaderClick,
+        onToggleClick = onToggleClick,
         onRenameClick = onRenameClick,
         onDeleteClick = onDeleteClick,
     )
@@ -92,6 +94,7 @@ fun TreeTabHeader(
     label: String,
     expanded: Boolean,
     onClick: () -> Unit,
+    onToggleClick: () -> Unit,
     onAddClick: (() -> Unit)? = null,
     onRenameClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
@@ -106,16 +109,21 @@ fun TreeTabHeader(
             .background(MaterialTheme.colorScheme.surface)
             .hoverable(interactionSource)
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 12.dp),
+            .padding(horizontal = 4.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Icon(
-            imageVector = Icons.Filled.ChevronRight,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp).graphicsLayer { rotationZ = rotation },
-            tint = MaterialTheme.colorScheme.onSurface,
-        )
+        IconButton(
+            onClick = onToggleClick,
+            modifier = Modifier.size(28.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.ChevronRight,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp).graphicsLayer { rotationZ = rotation },
+                tint = MaterialTheme.colorScheme.onSurface,
+            )
+        }
         Text(
             text = label,
             style = MaterialTheme.typography.titleSmall,
