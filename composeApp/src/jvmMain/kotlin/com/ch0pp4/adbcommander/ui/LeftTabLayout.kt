@@ -154,6 +154,9 @@ fun LeftTabLayout(
                             onHeaderClick = {
                                 collectionItemViewModel.onReset()
                                 onCollectionSelected(collection)
+                                if (collection.id !in expandedCollections) {
+                                    expandedCollections = expandedCollections + collection.id
+                                }
                             },
                             onItemSelected = { item ->
                                 onCollectionSelected(collection)
