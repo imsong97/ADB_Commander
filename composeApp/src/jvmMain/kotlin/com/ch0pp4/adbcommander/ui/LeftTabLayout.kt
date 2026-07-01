@@ -22,7 +22,11 @@ import com.ch0pp4.adbcommander.ui.components.RenameDialog
 import com.ch0pp4.adbcommander.ui.components.CreateCollectionDialog
 import com.ch0pp4.adbcommander.ui.components.DeleteConfirmDialog
 import com.ch0pp4.adbcommander.ui.components.TabSection
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.stringResource
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun LeftTabLayout(
@@ -40,6 +44,8 @@ fun LeftTabLayout(
     val collectionItems by collectionItemViewModel.collectionItems.collectAsState()
     val allCollections by collectionViewModel.collections.collectAsState()
     val userCollections = allCollections.filter { it.id !in hiddenCollectionIds }
+    var localUserCollections by remember { mutableStateOf(userCollections) }
+    LaunchedEffect(userCollections) { localUserCollections = userCollections }
 
     var showSaveDialog by remember { mutableStateOf(false) }
     var expandedCollections by remember { mutableStateOf(initialExpandedCollections) }
@@ -104,36 +110,63 @@ fun LeftTabLayout(
             prevCollectionCount = allCollections.size
         }
 
+        val reorderState = rememberReorderableLazyListState(
+            lazyListState = listState,
+        ) { from, to ->
+            localUserCollections = localUserCollections.toMutableList().apply {
+                add(to.index, removeAt(from.index))
+            }
+        }
+
+        LaunchedEffect(reorderState) {
+            snapshotFlow { reorderState.isAnyItemDragging }
+                .filter { !it }
+                .drop(1)
+                .collect {
+                    val visibleIdSet = localUserCollections.map { it.id }.toSet()
+                    val visibleIter = localUserCollections.iterator()
+                    val fullOrderedIds = allCollections.map { col ->
+                        if (col.id in visibleIdSet) visibleIter.next().id else col.id
+                    }
+                    collectionViewModel.reorderCollections(fullOrderedIds)
+                }
+        }
+
         LazyColumn(state = listState, modifier = Modifier.weight(1f)) {
             items(
-                items = userCollections,
+                items = localUserCollections,
                 key = { it.id },
             ) { collection ->
-                TabSection(
-                    label = collection.name,
-                    expanded = expandedCollections.contains(collection.id),
-                    items = collectionItems[collection.id] ?: emptyList(),
-                    selectedItemId = if (selectedCollection?.id == collection.id) collectionCommandState.selectedItemId else null,
-                    onToggleClick = {
-                        expandedCollections = if (collection.id in expandedCollections) {
-                            expandedCollections - collection.id
-                        } else {
-                            expandedCollections + collection.id
-                        }
-                    },
-                    onHeaderClick = {
-                        collectionItemViewModel.onReset()
-                        onCollectionSelected(collection)
-                    },
-                    onItemSelected = { item ->
-                        onCollectionSelected(collection)
-                        collectionItemViewModel.selectItem(item)
-                    },
-                    onItemDeleted = { collectionItemViewModel.deleteItem(it) },
-                    onItemRenamed = { item, title -> collectionItemViewModel.renameItem(item, title) },
-                    onRenameClick = { renameTargetCollection = collection },
-                    onDeleteClick = { deleteTargetCollection = collection },
-                )
+                ReorderableItem(reorderState, key = collection.id) { _ ->
+                    Column {
+                        TabSection(
+                            label = collection.name,
+                            expanded = expandedCollections.contains(collection.id),
+                            items = collectionItems[collection.id] ?: emptyList(),
+                            selectedItemId = if (selectedCollection?.id == collection.id) collectionCommandState.selectedItemId else null,
+                            onToggleClick = {
+                                expandedCollections = if (collection.id in expandedCollections) {
+                                    expandedCollections - collection.id
+                                } else {
+                                    expandedCollections + collection.id
+                                }
+                            },
+                            onHeaderClick = {
+                                collectionItemViewModel.onReset()
+                                onCollectionSelected(collection)
+                            },
+                            onItemSelected = { item ->
+                                onCollectionSelected(collection)
+                                collectionItemViewModel.selectItem(item)
+                            },
+                            onItemDeleted = { collectionItemViewModel.deleteItem(it) },
+                            onItemRenamed = { item, title -> collectionItemViewModel.renameItem(item, title) },
+                            headerModifier = Modifier.draggableHandle(),
+                            onRenameClick = { renameTargetCollection = collection },
+                            onDeleteClick = { deleteTargetCollection = collection },
+                        )
+                    }
+                }
             }
         }
 

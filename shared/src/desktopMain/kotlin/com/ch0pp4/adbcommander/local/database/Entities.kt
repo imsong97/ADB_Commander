@@ -14,9 +14,10 @@ class CollectionEntity(id: EntityID<Int>) : IntEntity(id) {
 
     var name      by CollectionTable.name
     var createdAt by CollectionTable.createdAt
+    var sortOrder by CollectionTable.sortOrder
 }
 
-fun CollectionEntity.toDataModel() = Collection(id = id.value, name = name)
+fun CollectionEntity.toDataModel() = Collection(id = id.value, name = name, sortOrder = sortOrder)
 
 class CollectionSavedCommandEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<CollectionSavedCommandEntity>(CollectionSavedCommandTable)
@@ -36,6 +37,13 @@ class CollectionSavedCommandExtraEntity(id: EntityID<Int>) : IntEntity(id) {
     var extraType    by CollectionSavedCommandExtraTable.extraType
     var extra        by CollectionSavedCommandExtraTable.extra
     var value        by CollectionSavedCommandExtraTable.value
+}
+
+fun IntentCommandType?.toEntity(): IntentType = when (this) {
+    IntentCommandType.BROADCAST -> IntentType.BROADCAST
+    IntentCommandType.START -> IntentType.START
+    IntentCommandType.START_SERVICE -> IntentType.STARTSERVICE
+    else -> IntentType.NONE
 }
 
 fun CollectionSavedCommandEntity.toDataModel() = CollectionSavedCommand(

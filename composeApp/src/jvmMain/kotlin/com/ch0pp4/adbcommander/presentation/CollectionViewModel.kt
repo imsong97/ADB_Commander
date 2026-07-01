@@ -47,6 +47,13 @@ class CollectionViewModel(private val repository: CommandRepository) : ViewModel
         }
     }
 
+    fun reorderCollections(orderedIds: List<Int>) {
+        viewModelScope.launch {
+            repository.reorderCollections(orderedIds)
+            loadCollections()
+        }
+    }
+
     fun renameCollection(id: Int, newName: String) {
         if (newName.isBlank()) return
         viewModelScope.launch {

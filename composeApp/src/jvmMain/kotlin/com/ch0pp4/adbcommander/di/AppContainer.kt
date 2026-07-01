@@ -6,25 +6,21 @@ import com.ch0pp4.adbcommander.local.LocalDataSourceImpl
 import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
 import com.ch0pp4.adbcommander.executor.AdbExecutor
 import com.ch0pp4.adbcommander.executor.JvmAdbExecutor
+import com.ch0pp4.adbcommander.preference.AppPreferences
 import com.ch0pp4.adbcommander.presentation.CollectionItemViewModel
 import com.ch0pp4.adbcommander.presentation.CollectionViewModel
 
 class AppContainer {
 
-    val adbExecutor: AdbExecutor by lazy { JvmAdbExecutor() }
+    val appPreferences: AppPreferences = AppPreferences()
 
-    val localDataSource: LocalDataSource by lazy {
-        LocalDataSourceImpl()
-    }
+    val adbExecutor: AdbExecutor = JvmAdbExecutor()
 
-    val commandRepository: CommandRepository by lazy {
-        CommandRepositoryImpl(localDataSource)
-    }
-    val collectionViewModel: CollectionViewModel by lazy {
-        CollectionViewModel(commandRepository)
-    }
+    val localDataSource: LocalDataSource = LocalDataSourceImpl()
 
-    val collectionCommandViewModel: CollectionItemViewModel by lazy {
-        CollectionItemViewModel(commandRepository, adbExecutor)
-    }
+    val commandRepository: CommandRepository = CommandRepositoryImpl(localDataSource)
+
+    val collectionViewModel: CollectionViewModel = CollectionViewModel(commandRepository)
+
+    val collectionCommandViewModel: CollectionItemViewModel = CollectionItemViewModel(commandRepository, adbExecutor)
 }

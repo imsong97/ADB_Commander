@@ -8,6 +8,7 @@ enum class IntentType { NONE, BROADCAST, START, STARTSERVICE } // for send broad
 object CollectionTable : IntIdTable(name = "collection") {
     val name = varchar(name = "name", length = 255)
     val createdAt = datetime(name = "created_at")
+    val sortOrder = integer(name = "sort_order").default(0)
 }
 
 object CollectionSavedCommandTable : IntIdTable(name = "collection_saved_command") {
