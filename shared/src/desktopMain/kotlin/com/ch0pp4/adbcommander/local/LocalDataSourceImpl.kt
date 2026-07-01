@@ -5,13 +5,14 @@ import com.ch0pp4.adbcommander.local.database.CollectionSavedCommandEntity
 import com.ch0pp4.adbcommander.local.database.CollectionSavedCommandExtraEntity
 import com.ch0pp4.adbcommander.local.database.CollectionSavedCommandTable
 import com.ch0pp4.adbcommander.local.database.CollectionTable
-import com.ch0pp4.adbcommander.local.database.IntentType
 import com.ch0pp4.adbcommander.local.database.toDataModel
+import com.ch0pp4.adbcommander.local.database.`toEntity()`
 import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
 import com.ch0pp4.adbcommander.data.model.BroadcastExtra
 import com.ch0pp4.adbcommander.data.model.Collection
 import com.ch0pp4.adbcommander.data.model.CollectionSavedCommand
 import com.ch0pp4.adbcommander.data.model.IntentCommandType
+import com.ch0pp4.adbcommander.local.database.toEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -84,12 +85,7 @@ class LocalDataSourceImpl(
                 this.collectionId = CollectionEntity[collectionId].id
                 this.title = title
                 this.command = command
-                this.intentType = when (intentType) {
-                    IntentCommandType.BROADCAST -> IntentType.BROADCAST
-                    IntentCommandType.START -> IntentType.START
-                    IntentCommandType.START_SERVICE -> IntentType.STARTSERVICE
-                    else -> IntentType.NONE
-                }
+                this.intentType = intentType.toEntity()
                 this.createdAt = LocalDateTime.now()
             }
             extras.forEach { extra ->
@@ -141,12 +137,7 @@ class LocalDataSourceImpl(
             val entity = CollectionSavedCommandEntity.findById(id) ?: return@transaction 0
             entity.title = title
             entity.command = command
-            entity.intentType = when (intentType) {
-                IntentCommandType.BROADCAST -> IntentType.BROADCAST
-                IntentCommandType.START -> IntentType.START
-                IntentCommandType.START_SERVICE -> IntentType.STARTSERVICE
-                else -> IntentType.NONE
-            }
+            entity.intentType = intentType.toEntity()
             entity.extras.forEach { it.delete() }
             extras.forEach { extra ->
                 CollectionSavedCommandExtraEntity.new {

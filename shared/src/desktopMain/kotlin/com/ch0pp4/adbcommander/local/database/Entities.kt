@@ -39,6 +39,13 @@ class CollectionSavedCommandExtraEntity(id: EntityID<Int>) : IntEntity(id) {
     var value        by CollectionSavedCommandExtraTable.value
 }
 
+fun IntentCommandType?.toEntity(): IntentType = when (this) {
+    IntentCommandType.BROADCAST -> IntentType.BROADCAST
+    IntentCommandType.START -> IntentType.START
+    IntentCommandType.START_SERVICE -> IntentType.STARTSERVICE
+    else -> IntentType.NONE
+}
+
 fun CollectionSavedCommandEntity.toDataModel() = CollectionSavedCommand(
     id = id.value,
     collectionId = collectionId.value,

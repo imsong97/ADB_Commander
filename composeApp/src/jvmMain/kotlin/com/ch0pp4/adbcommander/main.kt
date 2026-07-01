@@ -31,7 +31,6 @@ import adbcommander.composeapp.generated.resources.toast_export_success
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ch0pp4.adbcommander.local.database.DatabaseFactory
 import com.ch0pp4.adbcommander.di.AppContainer
-import com.ch0pp4.adbcommander.preference.AppPreferences
 import com.ch0pp4.adbcommander.presentation.CollectionItemViewModel
 import com.ch0pp4.adbcommander.presentation.CollectionViewModel
 import com.ch0pp4.adbcommander.presentation.model.ExportResult
@@ -50,7 +49,7 @@ fun main() = application {
     val windowState = rememberWindowState(size = DpSize(width = 1200.dp, height = 700.dp))
     val viewModelStore = remember { ViewModelStore() }
     val appContainer = remember { AppContainer() }
-    val appPreferences = remember { AppPreferences() }
+    val appPreferences = appContainer.appPreferences
 
     Window(
         onCloseRequest = {
