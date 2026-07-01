@@ -2,7 +2,7 @@ package com.ch0pp4.adbcommander.local.database
 
 import com.ch0pp4.adbcommander.data.model.BroadcastExtra
 import com.ch0pp4.adbcommander.data.model.Collection
-import com.ch0pp4.adbcommander.data.model.CollectionSavedCommand
+import com.ch0pp4.adbcommander.data.model.SavedCommandModel
 import com.ch0pp4.adbcommander.data.model.ExtraType
 import com.ch0pp4.adbcommander.data.model.IntentCommandType
 import org.jetbrains.exposed.dao.IntEntity
@@ -46,7 +46,7 @@ fun IntentCommandType?.toEntity(): IntentType = when (this) {
     else -> IntentType.NONE
 }
 
-fun CollectionSavedCommandEntity.toDataModel() = CollectionSavedCommand(
+fun CollectionSavedCommandEntity.toDataModel() = SavedCommandModel(
     id = id.value,
     collectionId = collectionId.value,
     title = title,

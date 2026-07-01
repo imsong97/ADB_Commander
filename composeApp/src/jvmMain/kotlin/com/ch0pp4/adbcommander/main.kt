@@ -36,7 +36,7 @@ import com.ch0pp4.adbcommander.di.AppContainer
 import com.ch0pp4.adbcommander.presentation.CollectionItemViewModel
 import com.ch0pp4.adbcommander.presentation.CollectionViewModel
 import com.ch0pp4.adbcommander.presentation.model.ExportResult
-import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
+import com.ch0pp4.adbcommander.presentation.model.CollectionUiModel
 import com.ch0pp4.adbcommander.ui.AppMenuBar
 import com.ch0pp4.adbcommander.ui.CollectionCommandLayout
 import com.ch0pp4.adbcommander.ui.LeftTabLayout
@@ -64,7 +64,7 @@ fun main() = application {
     ) {
         val collectionViewModel: CollectionViewModel = viewModel { appContainer.collectionViewModel }
         val collectionCommandViewModel: CollectionItemViewModel = viewModel { appContainer.collectionCommandViewModel }
-        var selectedCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
+        var selectedCollection by remember { mutableStateOf<CollectionUiModel?>(null) }
         val userCollections by collectionViewModel.collections.collectAsState()
         var hiddenCollectionIds by remember { mutableStateOf(appPreferences.getHiddenCollectionIds()) }
         val toastState = rememberToastState()

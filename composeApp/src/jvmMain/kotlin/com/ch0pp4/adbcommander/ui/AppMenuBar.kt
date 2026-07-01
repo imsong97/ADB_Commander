@@ -7,12 +7,12 @@ import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.menu_export
 import adbcommander.composeapp.generated.resources.menu_file
 import adbcommander.composeapp.generated.resources.menu_view
-import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
+import com.ch0pp4.adbcommander.presentation.model.CollectionUiModel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FrameWindowScope.AppMenuBar(
-    userCollections: List<UserCollectionUiModel>,
+    userCollections: List<CollectionUiModel>,
     hiddenCollectionIds: Set<Int>,
     onCollectionVisibilityChange: (id: Int, visible: Boolean) -> Unit,
     onExportClick: () -> Unit,

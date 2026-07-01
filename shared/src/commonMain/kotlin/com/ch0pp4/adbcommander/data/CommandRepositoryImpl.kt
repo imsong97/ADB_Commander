@@ -3,7 +3,7 @@ package com.ch0pp4.adbcommander.data
 import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
 import com.ch0pp4.adbcommander.data.model.BroadcastExtra
 import com.ch0pp4.adbcommander.data.model.Collection
-import com.ch0pp4.adbcommander.data.model.CollectionSavedCommand
+import com.ch0pp4.adbcommander.data.model.SavedCommandModel
 import com.ch0pp4.adbcommander.data.model.IntentCommandType
 
 class CommandRepositoryImpl(
@@ -27,7 +27,7 @@ class CommandRepositoryImpl(
         extras: List<BroadcastExtra>,
     ): Int = localDataSource.saveCollectionCommand(collectionId, title, command, intentType, extras)
 
-    override suspend fun getByCollection(collectionId: Int): List<CollectionSavedCommand> =
+    override suspend fun getByCollection(collectionId: Int): List<SavedCommandModel> =
         localDataSource.getByCollection(collectionId)
 
     override suspend fun deleteCollectionCommand(id: Int): Int =

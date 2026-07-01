@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ch0pp4.adbcommander.data.CommandRepository
 import com.ch0pp4.adbcommander.presentation.model.ExportResult
-import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
+import com.ch0pp4.adbcommander.presentation.model.CollectionUiModel
 import com.ch0pp4.adbcommander.presentation.model.toPresentation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,8 +17,8 @@ import java.io.File
 
 class CollectionViewModel(private val repository: CommandRepository) : ViewModel() {
 
-    private val _collections = MutableStateFlow(listOf<UserCollectionUiModel>())
-    val collections: StateFlow<List<UserCollectionUiModel>> = _collections
+    private val _collections = MutableStateFlow(listOf<CollectionUiModel>())
+    val collections: StateFlow<List<CollectionUiModel>> = _collections
 
     private val _exportResult = MutableSharedFlow<ExportResult>()
     val exportResult: SharedFlow<ExportResult> = _exportResult
