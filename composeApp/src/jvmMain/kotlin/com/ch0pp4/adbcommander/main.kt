@@ -26,6 +26,8 @@ import androidx.lifecycle.ViewModelStore
 import adbcommander.composeapp.generated.resources.Res
 import adbcommander.composeapp.generated.resources.adb_commander_icon
 import adbcommander.composeapp.generated.resources.app_name
+import adbcommander.composeapp.generated.resources.export_default_filename
+import adbcommander.composeapp.generated.resources.export_dialog_title
 import adbcommander.composeapp.generated.resources.toast_export_failure
 import adbcommander.composeapp.generated.resources.toast_export_success
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -68,6 +70,8 @@ fun main() = application {
         val toastState = rememberToastState()
         val exportSuccessMsg = stringResource(Res.string.toast_export_success)
         val exportFailureMsg = stringResource(Res.string.toast_export_failure)
+        val exportDialogTitle = stringResource(Res.string.export_dialog_title)
+        val exportDefaultFilename = stringResource(Res.string.export_default_filename)
 
         LaunchedEffect(userCollections) {
             selectedCollection = userCollections.find { it.id == selectedCollection?.id }
@@ -97,8 +101,8 @@ fun main() = application {
                 }
             },
             onExportClick = {
-                val dialog = FileDialog(window, "Export Commands", FileDialog.SAVE).apply {
-                    file = "commands.txt"
+                val dialog = FileDialog(window, exportDialogTitle, FileDialog.SAVE).apply {
+                    file = exportDefaultFilename
                     isVisible = true
                 }
                 val directory = dialog.directory

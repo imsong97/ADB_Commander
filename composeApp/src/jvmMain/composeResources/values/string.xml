@@ -58,6 +58,8 @@
     <string name="menu_view">View</string>
 
     <!-- Export -->
+    <string name="export_dialog_title">Export Commands</string>
+    <string name="export_default_filename">commands.txt</string>
     <string name="toast_export_success">Exported successfully</string>
     <string name="toast_export_failure">Failed to export</string>
 </resources>
