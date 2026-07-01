@@ -50,10 +50,16 @@ class CollectionItemViewModel(
 
     fun onCommandTypeChange(type: IntentCommandType) {
         _uiState.update { state ->
-            val new = state.copy(commandType = type, primaryValue = "", extras = emptyList(), executionResult = "")
+            val crossingAdb = type == IntentCommandType.ADB || state.commandType == IntentCommandType.ADB
+            val new = state.copy(
+                commandType = type,
+                primaryValue = if (crossingAdb) "" else state.primaryValue,
+                extras = if (crossingAdb) emptyList() else state.extras,
+                executionResult = "",
+            )
             val withCommand = new.copy(completedCommand = buildCommand(new))
             withCommand.copy(
-                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else false,
+                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else new.primaryValue.isNotBlank() || new.extras.isNotEmpty(),
             )
         }
     }
