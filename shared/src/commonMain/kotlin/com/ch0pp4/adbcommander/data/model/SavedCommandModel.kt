@@ -1,6 +1,6 @@
 package com.ch0pp4.adbcommander.data.model
 
-data class CollectionSavedCommand(
+data class SavedCommandModel(
     val id: Int,
     val collectionId: Int,
     val title: String,

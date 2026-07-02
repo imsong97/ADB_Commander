@@ -31,7 +31,7 @@ import com.ch0pp4.adbcommander.ui.components.ResultBox
 import com.ch0pp4.adbcommander.ui.components.ToastHost
 import com.ch0pp4.adbcommander.ui.components.rememberToastState
 import com.ch0pp4.adbcommander.presentation.CollectionItemViewModel
-import com.ch0pp4.adbcommander.presentation.model.BroadcastExtraUiModel
+import com.ch0pp4.adbcommander.presentation.model.BroadcastExtraModel
 import com.ch0pp4.adbcommander.presentation.model.ExtraTypeList
 import com.ch0pp4.adbcommander.presentation.model.IntentCommandType
 import com.ch0pp4.adbcommander.ui.theme.LightPrimaryContainerHover
@@ -226,8 +226,8 @@ fun CollectionCommandLayout(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CollectionExtrasTable(
-    extras: List<BroadcastExtraUiModel>,
-    onExtrasUpdate: (Int, BroadcastExtraUiModel) -> Unit,
+    extras: List<BroadcastExtraModel>,
+    onExtrasUpdate: (Int, BroadcastExtraModel) -> Unit,
     onExtraDelete: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -279,8 +279,8 @@ private fun CollectionExtrasTable(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CollectionExtraRow(
-    extra: BroadcastExtraUiModel,
-    onUpdate: (BroadcastExtraUiModel) -> Unit,
+    extra: BroadcastExtraModel,
+    onUpdate: (BroadcastExtraModel) -> Unit,
     onDelete: () -> Unit,
 ) {
     var typeExpanded by remember { mutableStateOf(false) }

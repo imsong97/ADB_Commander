@@ -1,9 +1,9 @@
 package com.ch0pp4.adbcommander.presentation.model
 
-data class SendBroadcastUiState(
+data class CommandUiState(
     val commandType: IntentCommandType = IntentCommandType.BROADCAST,
     val primaryValue: String = "",
-    val extras: List<BroadcastExtraUiModel> = emptyList(),
+    val extras: List<BroadcastExtraModel> = emptyList(),
     val completedCommand: String = "",
     val executionResult: String = "",
     val isLoading: Boolean = false,

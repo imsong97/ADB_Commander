@@ -6,11 +6,10 @@ import com.ch0pp4.adbcommander.local.database.CollectionSavedCommandExtraEntity
 import com.ch0pp4.adbcommander.local.database.CollectionSavedCommandTable
 import com.ch0pp4.adbcommander.local.database.CollectionTable
 import com.ch0pp4.adbcommander.local.database.toDataModel
-import com.ch0pp4.adbcommander.local.database.`toEntity()`
 import com.ch0pp4.adbcommander.data.datasource.LocalDataSource
 import com.ch0pp4.adbcommander.data.model.BroadcastExtra
 import com.ch0pp4.adbcommander.data.model.Collection
-import com.ch0pp4.adbcommander.data.model.CollectionSavedCommand
+import com.ch0pp4.adbcommander.data.model.SavedCommandModel
 import com.ch0pp4.adbcommander.data.model.IntentCommandType
 import com.ch0pp4.adbcommander.local.database.toEntity
 import kotlinx.coroutines.CoroutineDispatcher
@@ -100,7 +99,7 @@ class LocalDataSourceImpl(
         }
     }
 
-    override suspend fun getByCollection(collectionId: Int): List<CollectionSavedCommand> = withContext(context = dispatcher) {
+    override suspend fun getByCollection(collectionId: Int): List<SavedCommandModel> = withContext(context = dispatcher) {
         transaction {
             CollectionSavedCommandEntity
                 .find { CollectionSavedCommandTable.collectionId eq collectionId }

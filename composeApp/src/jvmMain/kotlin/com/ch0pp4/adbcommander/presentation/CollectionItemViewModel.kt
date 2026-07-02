@@ -4,14 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ch0pp4.adbcommander.data.CommandRepository
 import com.ch0pp4.adbcommander.executor.AdbExecutor
-import com.ch0pp4.adbcommander.presentation.model.BroadcastExtraUiModel
+import com.ch0pp4.adbcommander.presentation.model.BroadcastExtraModel
 import com.ch0pp4.adbcommander.presentation.model.IntentCommandType
 import com.ch0pp4.adbcommander.presentation.model.SavedCommandUiModel
-import com.ch0pp4.adbcommander.presentation.model.SendBroadcastUiState
+import com.ch0pp4.adbcommander.presentation.model.CommandUiState
 import com.ch0pp4.adbcommander.presentation.model.toData
 import com.ch0pp4.adbcommander.presentation.model.toDisplayString
 import com.ch0pp4.adbcommander.presentation.model.toPresentation
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,8 +22,8 @@ class CollectionItemViewModel(
     private val executor: AdbExecutor,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SendBroadcastUiState(commandType = IntentCommandType.ADB))
-    val uiState: StateFlow<SendBroadcastUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(CommandUiState(commandType = IntentCommandType.ADB))
+    val uiState: StateFlow<CommandUiState> = _uiState.asStateFlow()
 
     private val _collectionItems = MutableStateFlow<Map<Int, List<SavedCommandUiModel>>>(emptyMap())
     val collectionItems: StateFlow<Map<Int, List<SavedCommandUiModel>>> = _collectionItems.asStateFlow()
@@ -34,7 +33,7 @@ class CollectionItemViewModel(
     fun setCollection(collectionId: Int) {
         if (currentCollectionId == collectionId) return
         currentCollectionId = collectionId
-        _uiState.update { SendBroadcastUiState(commandType = IntentCommandType.ADB) }
+        _uiState.update { CommandUiState(commandType = IntentCommandType.ADB) }
         loadSavedItems()
     }
 
@@ -51,10 +50,16 @@ class CollectionItemViewModel(
 
     fun onCommandTypeChange(type: IntentCommandType) {
         _uiState.update { state ->
-            val new = state.copy(commandType = type, primaryValue = "", extras = emptyList(), executionResult = "")
+            val crossingAdb = type == IntentCommandType.ADB || state.commandType == IntentCommandType.ADB
+            val new = state.copy(
+                commandType = type,
+                primaryValue = if (crossingAdb) "" else state.primaryValue,
+                extras = if (crossingAdb) emptyList() else state.extras,
+                executionResult = "",
+            )
             val withCommand = new.copy(completedCommand = buildCommand(new))
             withCommand.copy(
-                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else false,
+                isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else new.primaryValue.isNotBlank() || new.extras.isNotEmpty(),
             )
         }
     }
@@ -168,7 +173,7 @@ class CollectionItemViewModel(
 
     fun onExtraAdd() {
         _uiState.update { state ->
-            val new = state.copy(extras = state.extras + BroadcastExtraUiModel())
+            val new = state.copy(extras = state.extras + BroadcastExtraModel())
             val withCommand = new.copy(completedCommand = buildCommand(new))
             withCommand.copy(
                 isModified = if (state.selectedTitle != null) withCommand.completedCommand != state.originalCompletedCommand else true,
@@ -176,7 +181,7 @@ class CollectionItemViewModel(
         }
     }
 
-    fun onExtrasUpdate(index: Int, extra: BroadcastExtraUiModel) {
+    fun onExtrasUpdate(index: Int, extra: BroadcastExtraModel) {
         _uiState.update { state ->
             val newExtras = state.extras.toMutableList().also { it[index] = extra }
             val new = state.copy(extras = newExtras)
@@ -226,7 +231,7 @@ class CollectionItemViewModel(
         }
     }
 
-    private fun buildCommand(state: SendBroadcastUiState): String {
+    private fun buildCommand(state: CommandUiState): String {
         if (state.primaryValue.isBlank()) return ""
         return when (state.commandType) {
             IntentCommandType.ADB -> state.primaryValue

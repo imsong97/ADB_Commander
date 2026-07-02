@@ -17,7 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import com.ch0pp4.adbcommander.presentation.CollectionItemViewModel
 import com.ch0pp4.adbcommander.presentation.CollectionViewModel
-import com.ch0pp4.adbcommander.presentation.model.UserCollectionUiModel
+import com.ch0pp4.adbcommander.presentation.model.CollectionUiModel
 import com.ch0pp4.adbcommander.ui.components.RenameDialog
 import com.ch0pp4.adbcommander.ui.components.CreateCollectionDialog
 import com.ch0pp4.adbcommander.ui.components.DeleteConfirmDialog
@@ -30,10 +30,10 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun LeftTabLayout(
-    selectedCollection: UserCollectionUiModel?,
+    selectedCollection: CollectionUiModel?,
     hiddenCollectionIds: Set<Int>,
     initialExpandedCollections: Set<Int>,
-    onCollectionSelected: (UserCollectionUiModel?) -> Unit,
+    onCollectionSelected: (CollectionUiModel?) -> Unit,
     onExpandedCollectionsChange: (Set<Int>) -> Unit,
     onCollectionDeleted: (Int) -> Unit,
     collectionViewModel: CollectionViewModel,
@@ -50,8 +50,8 @@ fun LeftTabLayout(
     var showSaveDialog by remember { mutableStateOf(false) }
     var expandedCollections by remember { mutableStateOf(initialExpandedCollections) }
     var showCreateCollectionDialog by remember { mutableStateOf(false) }
-    var deleteTargetCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
-    var renameTargetCollection by remember { mutableStateOf<UserCollectionUiModel?>(null) }
+    var deleteTargetCollection by remember { mutableStateOf<CollectionUiModel?>(null) }
+    var renameTargetCollection by remember { mutableStateOf<CollectionUiModel?>(null) }
 
     LaunchedEffect(expandedCollections) {
         onExpandedCollectionsChange(expandedCollections)
@@ -154,6 +154,9 @@ fun LeftTabLayout(
                             onHeaderClick = {
                                 collectionItemViewModel.onReset()
                                 onCollectionSelected(collection)
+                                if (collection.id !in expandedCollections) {
+                                    expandedCollections = expandedCollections + collection.id
+                                }
                             },
                             onItemSelected = { item ->
                                 onCollectionSelected(collection)
